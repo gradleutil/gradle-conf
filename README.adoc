@@ -28,7 +28,7 @@ buildscript {
   }
 }
 
-apply plugin: 'gradle-conf'
+apply plugin: 'gradleutil.conf'
 
 config {
   conf = file('config.conf')

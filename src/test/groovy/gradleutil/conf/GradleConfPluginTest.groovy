@@ -33,7 +33,7 @@ class GradleConfPluginTest extends Specification {
 }'''
 
         when:
-        project.plugins.apply("gradle-conf")
+        project.plugins.apply("gradleutil.conf")
 
         then:
         project.tasks.findByName("printConfig") != null

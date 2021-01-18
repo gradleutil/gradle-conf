@@ -7,7 +7,6 @@ buildscript {
 plugins {
     id 'java-gradle-plugin'
     id 'groovy'
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
     id 'maven-publish'
     id "com.gradle.plugin-publish" version "0.11.0"
 }
@@ -22,43 +21,45 @@ repositories {
 }
 
 dependencies {
-    shadow localGroovy()
-    shadow gradleApi()
+    implementation localGroovy()
+    implementation gradleApi()
 
     implementation 'com.github.gradleutil:conf:1.0.2'
 
     testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
 }
 
-configurations.testImplementation.extendsFrom configurations.shadow
-
-jar {
-    archiveClassifier.set('core')
-}
-
 javadoc {
     failOnError = false
 }
 
-shadowJar {
-    archiveClassifier.set( null )
-    mergeServiceFiles()
-    doLast{
-        logger.lifecycle( "Shadow jar:" + outputs.files.first() )
-    }
-}
-artifacts.add('implementation', shadowJar)
-
-
 gradlePlugin {
     plugins {
         gradleconf {
-            id = 'gradle-conf'
+            id = 'gradleutil.conf'
             implementationClass = 'gradleutil.conf.GradleConfPlugin'
         }
         gradlesettingsconf {
-            id = 'gradle-settings-conf'
+            id = 'gradleutil.settings-conf'
             implementationClass = 'gradleutil.conf.GradleConfSettingsPlugin'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/gradleutil/gradle-conf'
+    vcsUrl = 'https://github.com/gradleutil/gradle-conf'
+    description = 'Configure your Gradle builds with HOCON'
+    tags = ['build-tool','configuration','json','json-schema','lightbend-conf','typesafe-conf']
+
+    plugins {
+        gradleconf {
+            id = 'gradleutil.conf'
+            displayName = 'Configure projects with HOCON'
+        }
+        gradlesettingsconf {
+            id = 'gradleutil.settings-conf'
+            displayName = 'Configure settings.gradle with HOCON'
         }
     }
 }
