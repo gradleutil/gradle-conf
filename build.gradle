@@ -116,9 +116,3 @@ artifacts {
     archives sourcesJar
     archives javadocJar
 }
-
-
-// ======== deploy artifacts ========
-// Allows forks of the plugin to define their own deployment mechanisms
-// in separate files named according to their maven group name
-apply from: "deploy/${group}.gradle"
