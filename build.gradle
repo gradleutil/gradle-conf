@@ -5,13 +5,12 @@ buildscript {
 }
 
 plugins {
-    id 'java-gradle-plugin'
-    id 'groovy'
+    id 'groovy-gradle-plugin'
     id 'maven-publish'
     id "com.gradle.plugin-publish" version "0.11.0"
 }
 
-version = file('VERSION').text
+version = file('VERSION').text.trim()
 group = 'gradleutil'
 
 repositories {
@@ -45,6 +44,7 @@ gradlePlugin {
         }
     }
 }
+
 
 pluginBundle {
     website = 'https://github.com/gradleutil/gradle-conf'
@@ -81,7 +81,7 @@ tasks.withType(Test){
     // Show test results.
     group = 'tests'
     testLogging { events "passed", "skipped", "failed" }
-    testLogging.showStandardStreams = true
+    testLogging.showStandardStreams = false
 }
 
 check {
