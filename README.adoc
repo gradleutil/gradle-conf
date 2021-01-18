@@ -1,0 +1,36 @@
+Gradle Conf Plugin
+=================
+
+![build status](https://github.com/gradleutil/gradle-conf/workflows/Build%20master%20branch/badge.svg)
+
+Configure your builds with HOCON
+
+Current Features
+-----------------------------------------
+
+* Read HOCON
+  * Verify against JSON Schema
+  * Generate configuration object based off of schema
+
+Usage
+-----
+
+Add this to your `build.gradle`:
+
+```groovy
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url "https://plugins.gradle.org/m2/" }
+  }
+  dependencies {
+    classpath "gradleutil:gradle-conf:0.0.1"
+  }
+}
+
+apply plugin: 'gradleutil.conf'
+
+config {
+  conf = file('config.conf')
+}
+```

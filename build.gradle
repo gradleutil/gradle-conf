@@ -1,0 +1,118 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+
+plugins {
+    id 'groovy-gradle-plugin'
+    id 'maven-publish'
+    id "com.gradle.plugin-publish" version "0.11.0"
+}
+
+version = file('VERSION').text.trim()
+group = 'gradleutil'
+
+repositories {
+    jcenter()
+    mavenLocal()
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+    implementation localGroovy()
+    implementation gradleApi()
+
+    implementation 'com.github.gradleutil:conf:1.0.2'
+
+    testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
+}
+
+javadoc {
+    failOnError = false
+}
+
+gradlePlugin {
+    plugins {
+        gradleconf {
+            id = 'gradleutil.conf'
+            implementationClass = 'gradleutil.conf.GradleConfPlugin'
+        }
+        gradlesettingsconf {
+            id = 'gradleutil.settings-conf'
+            implementationClass = 'gradleutil.conf.GradleConfSettingsPlugin'
+        }
+    }
+}
+
+
+pluginBundle {
+    website = 'https://github.com/gradleutil/gradle-conf'
+    vcsUrl = 'https://github.com/gradleutil/gradle-conf'
+    description = 'Configure your Gradle builds with HOCON'
+    tags = ['build-tool','configuration','json','json-schema','lightbend-conf','typesafe-conf']
+
+    plugins {
+        gradleconf {
+            id = 'gradleutil.conf'
+            displayName = 'Configure projects with HOCON'
+        }
+        gradlesettingsconf {
+            id = 'gradleutil.settings-conf'
+            displayName = 'Configure settings.gradle with HOCON'
+        }
+    }
+}
+
+sourceSets {
+    functionalTest {
+    }
+}
+
+gradlePlugin.testSourceSets(sourceSets.functionalTest)
+configurations.functionalTestImplementation.extendsFrom(configurations.testImplementation)
+
+task functionalTest(type: Test, group:'tests') {
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
+}
+
+tasks.withType(Test){
+    // Show test results.
+    group = 'tests'
+    testLogging { events "passed", "skipped", "failed" }
+    testLogging.showStandardStreams = false
+}
+
+check {
+    group = 'tests'
+    dependsOn(tasks.functionalTest)
+}
+
+task artifactList {
+    group = "Help"
+    description = "Displays the artifacts associated with each configuration of " + project
+    doFirst {
+        configurations.findAll().each { config ->
+            println "${config}:"
+            config.allArtifacts.getFiles().each { file -> println " " + file }
+            config.dependencies.each{ dep -> println " dep:" + dep.toString()}
+            println ' '
+        }
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set "sources"
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set "javadoc"
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
