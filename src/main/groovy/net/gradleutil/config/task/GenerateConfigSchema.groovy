@@ -1,4 +1,4 @@
-package gradleutil.conf.task
+package net.gradleutil.config.task
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty

@@ -10,8 +10,9 @@ plugins {
     id "com.gradle.plugin-publish" version "0.11.0"
 }
 
-version = file('VERSION').text.trim()
-group = 'gradleutil'
+version = project.version != 'unspecified' ? project.version : file('VERSION').text.trim()
+group = 'net.gradleutil'
+
 
 repositories {
     jcenter()
@@ -23,7 +24,7 @@ dependencies {
     implementation localGroovy()
     implementation gradleApi()
 
-    implementation 'com.github.gradleutil:conf:1.0.2'
+    implementation 'net.gradleutil:conf:1.0.7'
 
     testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
 }
@@ -32,15 +33,16 @@ javadoc {
     failOnError = false
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 gradlePlugin {
     plugins {
         gradleconf {
-            id = 'gradleutil.conf'
-            implementationClass = 'gradleutil.conf.GradleConfPlugin'
-        }
-        gradlesettingsconf {
-            id = 'gradleutil.settings-conf'
-            implementationClass = 'gradleutil.conf.GradleConfSettingsPlugin'
+            id = 'net.gradleutil.conf'
+            implementationClass = 'net.gradleutil.config.ConfPlugin'
         }
     }
 }
@@ -54,27 +56,23 @@ pluginBundle {
 
     plugins {
         gradleconf {
-            id = 'gradleutil.conf'
+            id = 'net.gradleutil.conf'
             displayName = 'Configure projects with HOCON'
-        }
-        gradlesettingsconf {
-            id = 'gradleutil.settings-conf'
-            displayName = 'Configure settings.gradle with HOCON'
         }
     }
 }
 
 sourceSets {
-    functionalTest {
+    testPlugin {
     }
 }
 
-gradlePlugin.testSourceSets(sourceSets.functionalTest)
-configurations.functionalTestImplementation.extendsFrom(configurations.testImplementation)
+gradlePlugin.testSourceSets(sourceSets.testPlugin)
+configurations.testPluginImplementation.extendsFrom(configurations.testImplementation)
 
-task functionalTest(type: Test, group:'tests') {
-    testClassesDirs = sourceSets.functionalTest.output.classesDirs
-    classpath = sourceSets.functionalTest.runtimeClasspath
+task testPlugin(type: Test, group:'tests') {
+    testClassesDirs = sourceSets.testPlugin.output.classesDirs
+    classpath = sourceSets.testPlugin.runtimeClasspath
 }
 
 tasks.withType(Test){
@@ -86,7 +84,7 @@ tasks.withType(Test){
 
 check {
     group = 'tests'
-    dependsOn(tasks.functionalTest)
+    dependsOn(tasks.testPlugin)
 }
 
 task artifactList {
@@ -102,17 +100,29 @@ task artifactList {
     }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    archiveClassifier.set "sources"
-    from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier.set "javadoc"
-    from javadoc.destinationDir
-}
-
 artifacts {
     archives sourcesJar
     archives javadocJar
+}
+
+tasks.withType(AbstractPublishToMaven) { publishTask ->
+    def printInfo = { AbstractPublishToMaven task, String repoPath ->
+        task.publication.with { p ->
+            def sb = new StringBuilder()
+            p.artifacts.each {
+                String artifactPath = p.groupId.replace(".", "/") + "/" + p.artifactId + "/" + p.version
+                sb.append('\n  ' + repoPath).append(artifactPath)
+                        .append(it.classifier ? '-' + it.classifier : '').append('.' + it.extension)
+            }
+            logger.lifecycle("Published ${p.groupId}:${p.artifactId}:${p.version}${sb.toString()}")
+        }
+    }
+    doLast {
+        if (publishTask instanceof PublishToMavenRepository) {
+            printInfo(publishTask, publishTask.repository.url.toString())
+        } else {
+            String repoPath = repositories.mavenLocal().url.toURL().getFile()
+            printInfo(publishTask, repoPath)
+        }
+    }
 }
