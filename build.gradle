@@ -13,7 +13,6 @@ plugins {
 version = project.version != 'unspecified' ? project.version : file('VERSION').text.trim()
 group = 'net.gradleutil'
 
-
 repositories {
     jcenter()
     mavenLocal()
@@ -41,7 +40,7 @@ java {
 gradlePlugin {
     plugins {
         gradleconf {
-            id = 'net.gradleutil.conf'
+            id = 'net.gradleutil.gradle-conf'
             implementationClass = 'net.gradleutil.config.ConfPlugin'
         }
     }
@@ -56,7 +55,7 @@ pluginBundle {
 
     plugins {
         gradleconf {
-            id = 'net.gradleutil.conf'
+            id = 'net.gradleutil.gradle-conf'
             displayName = 'Configure projects with HOCON'
         }
     }

@@ -1,23 +1,21 @@
-Gradle Conf Plugin
-=================
+= Gradle Conf Plugin
 
-![build status](https://github.com/gradleutil/gradle-conf/workflows/Build%20master%20branch/badge.svg)
+image::https://github.com/gradleutil/gradle-conf/workflows/Build%20master%20branch/badge.svg[link=https://github.com/gradleutil/gradle-conf/actions?query=workflow%3A%22Build+master+branch%22, alt=Badge]
 
 Configure your builds with HOCON
 
-Current Features
------------------------------------------
+== Current Features
 
 * Read HOCON
   * Verify against JSON Schema
   * Generate configuration object based off of schema
 
-Usage
------
+== Usage
 
 Add this to your `build.gradle`:
 
-```groovy
+[source,groovy]
+----
 buildscript {
   repositories {
     mavenCentral()
@@ -33,4 +31,4 @@ apply plugin: 'gradleutil.conf'
 config {
   conf = file('config.conf')
 }
-```
+----
