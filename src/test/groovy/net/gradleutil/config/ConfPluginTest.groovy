@@ -36,7 +36,7 @@ class ConfPluginTest extends Specification {
 }'''
 
         when:
-        project.plugins.apply("net.gradleutil.conf")
+        project.plugins.apply("net.gradleutil.gradle-conf")
 
         then:
         project.tasks.findByName("printConfig") != null
@@ -71,7 +71,7 @@ class ConfPluginTest extends Specification {
         """.stripIndent()
 
         when:
-        project.plugins.apply("net.gradleutil.conf")
+        project.plugins.apply("net.gradleutil.gradle-conf")
 
         then:
         def confConfig = project.extensions.findByType(ConfConfig)
@@ -94,7 +94,7 @@ class ConfPluginTest extends Specification {
         project.logging.setLevelInternal(LogLevel.DEBUG)
 
         when:
-        project.plugins.apply("net.gradleutil.conf")
+        project.plugins.apply("net.gradleutil.gradle-conf")
 
         then:
         project.tasks.findByName("printConfig") != null
@@ -114,7 +114,7 @@ class ConfPluginTest extends Specification {
         buildDir.mkdirs()
 
         when:
-        project.plugins.apply("net.gradleutil.conf")
+        project.plugins.apply("net.gradleutil.gradle-conf")
 
         then:
         project.tasks.findByName("printConfig") != null
@@ -132,7 +132,7 @@ class ConfPluginTest extends Specification {
         buildDir.mkdirs()
 
         when:
-        project.plugins.apply("net.gradleutil.conf")
+        project.plugins.apply("net.gradleutil.gradle-conf")
 
         then:
         project.tasks.findByName("printConfig") != null

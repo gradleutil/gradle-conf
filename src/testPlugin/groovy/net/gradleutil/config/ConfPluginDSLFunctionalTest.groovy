@@ -19,7 +19,7 @@ class ConfPluginDSLFunctionalTest extends Specification {
         new File(projectDir, "configConf.conf").text = new File('src/testPlugin/resources/json/veggies.json').text
         new File(projectDir, "settings.gradle") << """
             plugins {
-                id('net.gradleutil.conf')
+                id('net.gradleutil.gradle-conf')
             }
             confConfig{
                 conf = file('configConf.conf')

@@ -17,7 +17,7 @@ class ConfPluginFunctionalTest extends Specification {
         new File(projectDir, "settings.gradle") << ""
         new File(projectDir, "build.gradle") << """
             plugins {
-                id('net.gradleutil.conf')
+                id('net.gradleutil.gradle-conf')
             }
         """
 
@@ -44,7 +44,7 @@ class ConfPluginFunctionalTest extends Specification {
         new File(projectDir, "build.gradle") << ""
         new File(projectDir, "settings.gradle") << """
             plugins {
-                id('net.gradleutil.conf')
+                id('net.gradleutil.gradle-conf')
             }
             confConfig{
                 conf = file('${configFile.name}')
@@ -74,7 +74,7 @@ class ConfPluginFunctionalTest extends Specification {
         new File(projectDir, "build.gradle") << """
         plugins{ 
             id('java') 
-            id('net.gradleutil.conf')
+            id('net.gradleutil.gradle-conf')
         }
         confConfig {
             conf.set file('${configFile.name}')
