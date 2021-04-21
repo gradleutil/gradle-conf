@@ -1,0 +1,223 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/MinecraftConfig",
+  "definitions": {
+    "MinecraftConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "title": "Schema",
+          "description": "Pointer to the schema against which this document should be validated."
+        },
+        "name": {
+          "type": "string"
+        },
+        "minecraft": {
+          "$ref": "#/definitions/Minecraft"
+        },
+        "type": {
+          "enum": [
+            "vanilla",
+            "forge",
+            "spigot",
+            "paper"
+          ]
+        },
+        "mods": {
+          "type": "array",
+          "title": "Mods",
+          "items": {
+            "$ref": "#/definitions/Mod"
+          }
+        },
+        "git": {
+          "$ref": "#/definitions/Git"
+        },
+        "publishing": {
+            "type": "array",
+            "title": "Publishing",
+            "items": {
+              "$ref": "#/definitions/Repository"
+            }
+        }
+      },
+      "required": [
+      ],
+      "title": "MinecraftConfig"
+    },
+    "Minecraft": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "enum": [
+            "1.6",
+            "1.8",
+            "1.9",
+            "1.10",
+            "1.12",
+            "1.12.2",
+            "1.13",
+            "1.14",
+            "1.14.4",
+            "1.15.2"
+          ]
+        }
+      }
+    },
+    "Mod": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "artifacts": {
+          "type": "array",
+          "title": "Artifacts",
+          "items": {
+            "$ref": "#/definitions/ModArtifact"
+          }
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Mod"
+    },
+    "ModArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "downloadUrl": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "fileId": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "minecraft": {
+          "$ref": "#/definitions/Minecraft"
+        },
+        "dependencies": {
+          "type": "array",
+          "title": "dependencies",
+          "items": {
+            "$ref": "#/definitions/ModArtifact"
+          }
+        },
+        "mavenDependency": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "minecraft"
+      ],
+      "title": "Mod Artifact"
+    },
+    "Repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "maven",
+            "scp",
+            "git"
+          ]
+        },
+        "url": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "credentials": {
+          "$ref": "#/definitions/Credentials"
+        }
+      },
+      "if": {
+        "properties": { "type": { "const": "scp" } }
+      },
+      "then": {
+        "required": [
+          "host","credentials","path"
+        ]
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Repository"
+    },
+    "Credentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "identityFile": {
+          "type": "string"
+        },
+        "passphrase": {
+          "type": "string"
+        }
+      },
+      "required": [
+      ],
+      "title": "Credentials"
+    },
+
+    "Git": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dir": {
+          "type": "string",
+          "default": "~/minecraft"
+        },
+        "repoUri": {
+          "type": "string",
+          "default": "https://github.com/minecraft"
+        }
+      },
+      "required": [
+        "dir",
+        "repoUri"
+      ],
+      "title": "Git"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://jitpack.io" }
+    }
+}
+
+plugins {
+    id('net.gradleutil.gradle-conf') version('1.1.0-SNAPSHOT')
+}
+
+rootProject.name = 'example'
+
+confConfig {
+    schemaFile = file('schema.json')
+    conf = file('config.json')
+    //dslFile.set(file('src/main/groovy/net/modrepo/ModRepoConfig.groovy'))
+    outputDirectory = new File('/tmp/model')
+    rootClassName = 'Config'
+    packageName = 'net.example'
+    generateBean = true
+    schemaName = 'Example.schema.json'
+    silent = false
+}
+
+/*
+def isIncludedBuild = gradle.parent != null
+if (!isIncludedBuild && file('../conf').exists()) {
+    includeBuild(file('../conf')) {
+        dependencySubstitution {
+            substitute module('gradleutil:conf') with project(':')
+        }
+    }
+}
+*/

@@ -2,24 +2,26 @@ package net.gradleutil.config.extension
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 import net.gradleutil.conf.Loader
-import net.gradleutil.conf.generator.ConfigSchema
 import net.gradleutil.conf.util.ConfUtil
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.logging.Logging
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 
 import javax.inject.Inject
 
+@Slf4j
+@CompileStatic
 class ConfConfig {
     static final String NAMESPACE = 'confConfig'
-    static final log = Logging.getLogger(this)
 
     final ObjectFactory objectFactory
     DirectoryProperty outputDirectory
+    DirectoryProperty modelPluginDirectory
     RegularFileProperty conf
     RegularFileProperty confOverride
     RegularFileProperty schemaFile
@@ -27,53 +29,65 @@ class ConfConfig {
     Property<String> packageName
     Property<String> rootClassName
     Property<String> schemaName
+    Property<String> projectExtensionName
+    Property<Boolean> allowUnresolved
     Property<Boolean> generateBean
     Property<Boolean> generateSchema
     Property<Boolean> useSystemProperties
     Property<Boolean> useSystemEnvironment
     Property<Boolean> reloadAtConfiguration
+    Property<Boolean> silent
 
     Config configObject
     Map<String, Object> config
     MapProperty<String, Object> configProperty
+    ClassLoader classLoader
 
     @Inject
     ConfConfig(ObjectFactory objectFactory) {
         this.objectFactory = objectFactory
         outputDirectory = objectFactory.directoryProperty()
+        modelPluginDirectory = objectFactory.directoryProperty()
+        projectExtensionName = objectFactory.property(String).convention('config')
         baseName = objectFactory.property(String).convention('config.conf')
         packageName = objectFactory.property(String).convention('config')
         rootClassName = objectFactory.property(String).convention('Config')
         schemaName = objectFactory.property(String).convention('Config')
-        schemaFile = objectFactory.fileProperty().convention(outputDirectory.file("schema.json"))
+        schemaFile = objectFactory.fileProperty().convention(outputDirectory.file("schemas.json"))
         conf = objectFactory.fileProperty()
         confOverride = objectFactory.fileProperty()
+        allowUnresolved = objectFactory.property(Boolean).convention(true)
         useSystemProperties = objectFactory.property(Boolean).convention(false)
         useSystemEnvironment = objectFactory.property(Boolean).convention(false)
         generateBean = objectFactory.property(Boolean).convention(false)
         generateSchema = objectFactory.property(Boolean).convention(false)
+        silent = objectFactory.property(Boolean).convention(true)
         configProperty = objectFactory.mapProperty(String, Object)
         reloadAtConfiguration = objectFactory.property(Boolean).convention(false)
+        classLoader = objectFactory.class.classLoader
     }
 
     ConfConfig load() {
         if (config) {
             return this
         }
-        log.info("loading config")
+        log.info("loading config: ${ conf.asFile.getOrNull() }")
         def loaderOptions = Loader.defaultOptions()
-                .setUseSystemProperties(useSystemProperties.get())
-                .setUseSystemEnvironment(useSystemEnvironment.get())
-                .setBaseName(baseName.get())
-                .setConf(conf.asFile.getOrNull())
-                .setConfOverride(confOverride.asFile.getOrNull())
-                .setSchemaFile(schemaFile.asFile.getOrNull())
+                .useSystemProperties(useSystemProperties.get())
+                .useSystemEnvironment(useSystemEnvironment.get())
+                .baseName(baseName.get())
+                .conf(conf.asFile.getOrNull())
+                .confOverride(confOverride.asFile.getOrNull())
+                .schemaFile(schemaFile.asFile.getOrNull())
+                .allowUnresolved(allowUnresolved.get())
+                .classLoader(classLoader)
+                .silent(silent.get())
 
         if (generateSchema.get()) {
             if (!schemaFile.getAsFile().get().exists()) {
-                log.lifecycle "generating schema ${schemaFile.get()}"
+                log.info "generating schema ${schemaFile.get()}"
                 outputDirectory.getAsFile().get().mkdirs()
-                ConfigSchema.configFileToSchemaFile(conf.getAsFile().get(), schemaFile.getAsFile().get())
+                ConfUtil.configFileToReferenceSchemaFile(conf.getAsFile().get(), rootClassName.get(), schemaFile.getAsFile().get())
             }
         }
 
@@ -99,7 +113,7 @@ class ConfConfig {
     }
 
     def <T> T load(Class<T> clazz) {
-        return Loader.create(configObject, clazz)
+        return Loader.create(configObject, clazz, Loader.defaultOptions().allowUnresolved(true).silent(false))
     }
 
     static Config load(File config) {

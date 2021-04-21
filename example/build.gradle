@@ -1,0 +1,39 @@
+import net.example.loaded
+
+plugins {
+    id 'net.example.config'
+    id 'groovy'
+}
+
+dependencies {
+    localGroovy()
+}
+
+generate {
+    mypackage {
+        sourceSchemaFile = file('model.schema.json')
+        //sourceConf.set(file('config.json'))
+        //generatedSchemaFile.set(file('newschema.json'))
+        //dslFile.set(file('src/main/groovy/net/modrepo/ModRepoConfig.groovy'))
+        outputDirectory = file('./src/main/groovy/')
+        rootClassName = 'MinecraftConfig'
+        dslFileName = 'ModelDSL.groovy'
+        packageName = 'org.example.model'
+        schemaName = 'Model.schema.json'
+    }
+}
+
+/*
+    schemaFile.set(file('model.schema.json'))
+    //sourceConf.set(file('config.json'))
+    //generatedSchemaFile.set(file('newschema.json'))
+    //dslFile.set(file('src/main/groovy/net/modrepo/ModRepoConfig.groovy'))
+    outputDirectory.set(file('./src/main/groovy/'))
+    rootClassName.set('MinecraftConfig')
+    dslFileName.set('ModelDSL.groovy')
+    packageName.set('org.example.model')
+    schemaName.set('Model.schema.json')
+}
+*/
+
+println config

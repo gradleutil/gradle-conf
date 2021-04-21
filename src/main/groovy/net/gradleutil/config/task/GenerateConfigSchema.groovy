@@ -1,8 +1,11 @@
 package net.gradleutil.config.task
 
+import net.gradleutil.conf.transform.hocon.HoconToSchema
+import net.gradleutil.conf.util.ConfUtil
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileType
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
@@ -11,29 +14,31 @@ import org.gradle.work.InputChanges
 abstract class GenerateConfigSchema extends DefaultTask {
     @Incremental
     @PathSensitive(PathSensitivity.NAME_ONLY)
-    @InputDirectory
-    abstract DirectoryProperty getInputDir()
+    @InputFile
+    abstract RegularFileProperty getInputFile()
 
-    @OutputDirectory
-    abstract DirectoryProperty getOutputDir()
+    @OutputFile
+    abstract RegularFileProperty getOutputFile()
+
+    @Optional
+    @Input
+    abstract Property<String> getRefName()
 
     @TaskAction
     void execute(InputChanges inputChanges) {
 
-        println(inputChanges.incremental
+        logger.info(inputChanges.incremental
                 ? 'Executing incrementally'
                 : 'Executing non-incrementally'
         )
 
-        inputChanges.getFileChanges(inputDir).each { change ->
-            if (change.fileType == FileType.DIRECTORY) return
+        inputChanges.getFileChanges(inputFile).each { change ->
 
             println "${change.changeType}: ${change.normalizedPath}"
-            def targetFile = outputDir.file(change.normalizedPath).get().asFile
             if (change.changeType == ChangeType.REMOVED) {
-                targetFile.delete()
+                outputFile.delete()
             } else {
-                targetFile.text = change.file.text.reverse()
+                ConfUtil.configFileToReferenceSchemaFile(inputFile.get().asFile, refName.get(), outputFile.get().asFile)
             }
         }
     }

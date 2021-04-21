@@ -1,31 +1,72 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-}
+import java.nio.file.Paths
 
 plugins {
     id 'groovy-gradle-plugin'
     id 'maven-publish'
     id "com.gradle.plugin-publish" version "0.11.0"
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'net.gradleutil.gradle-jte' version '1.8.0-SNAPSHOT'
 }
 
 version = project.version != 'unspecified' ? project.version : file('VERSION').text.trim()
 group = 'net.gradleutil'
 
+sourceSets {
+    testPlugin {
+    }
+    templates {
+        groovy {
+            srcDir 'src/templates'
+        }
+    }
+}
+
+sourceSets.main.resources.srcDirs += sourceSets.templates.output.classesDirs
+
 repositories {
-    jcenter()
     mavenLocal()
+    mavenCentral()
     maven { url "https://jitpack.io" }
 }
 
+def jteDir = layout.buildDirectory.dir("jte-classes")
+def jteSrc = layout.projectDirectory.dir("src/templates/net/gradleutil/gen/")
+
+tasks.precompileJte {
+    sourceDirectory = Paths.get(jteSrc.asFile.toURI())
+    targetDirectory = Paths.get(jteDir.get().asFile.toURI())
+    compilePath = sourceSets.main.runtimeClasspath += sourceSets.templates.runtimeClasspath
+    contentType = 'Plain'
+}
+tasks.register('jteJar', Jar){
+    it.from precompileJte
+    it.archiveFileName.set('jte.gradle.templates.zip')
+}
+
 dependencies {
-    implementation localGroovy()
-    implementation gradleApi()
+    shadow localGroovy()
+    shadow gradleApi()
+    templatesImplementation localGroovy()
+    templatesImplementation "net.gradleutil:conf:1.0.8-SNAPSHOT"
+    //implementation "net.gradleutil:conf:1.0.8-SNAPSHOT"
 
-    implementation 'net.gradleutil:conf:1.0.7'
+    implementation sourceSets.templates.output
 
-    testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
+    implementation "net.gradleutil:conf:1.0.8-SNAPSHOT"
+    testImplementation "net.gradleutil:conf:1.0.8-SNAPSHOT:tests"
+
+//    testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
+    testImplementation 'org.spockframework:spock-core:2.0-M5-groovy-3.0'
+}
+
+processResources.dependsOn(compileTemplatesGroovy)
+processResources.dependsOn(precompileJte)
+processResources.dependsOn(jteJar)
+
+processResources {
+    from ('src/templates/') {
+        include '**/*.jte'
+    }
 }
 
 javadoc {
@@ -51,7 +92,7 @@ pluginBundle {
     website = 'https://github.com/gradleutil/gradle-conf'
     vcsUrl = 'https://github.com/gradleutil/gradle-conf'
     description = 'Configure your Gradle builds with HOCON'
-    tags = ['build-tool','configuration','json','json-schema','lightbend-conf','typesafe-conf']
+    tags = ['build-tool', 'configuration', 'json', 'json-schema', 'lightbend-conf', 'typesafe-conf']
 
     plugins {
         gradleconf {
@@ -61,24 +102,22 @@ pluginBundle {
     }
 }
 
-sourceSets {
-    testPlugin {
-    }
-}
-
 gradlePlugin.testSourceSets(sourceSets.testPlugin)
+configurations.testImplementation.extendsFrom(configurations.shadow)
 configurations.testPluginImplementation.extendsFrom(configurations.testImplementation)
 
-task testPlugin(type: Test, group:'tests') {
+task testPlugin(type: Test, group: 'tests') {
     testClassesDirs = sourceSets.testPlugin.output.classesDirs
-    classpath = sourceSets.testPlugin.runtimeClasspath
+    classpath = sourceSets.testPlugin.runtimeClasspath += precompileJte.outputs.files
 }
 
-tasks.withType(Test){
+tasks.withType(Test) {
     // Show test results.
     group = 'tests'
-    testLogging { events "passed", "skipped", "failed" }
-    testLogging.showStandardStreams = false
+    testLogging { it.events "passed", "skipped", "failed" }
+//    testLogging.showStandardStreams = true
+    testLogging.showCauses = true
+    testLogging.exceptionFormat('full')
 }
 
 check {
@@ -93,24 +132,81 @@ task artifactList {
         configurations.findAll().each { config ->
             println "${config}:"
             config.allArtifacts.getFiles().each { file -> println " " + file }
-            config.dependencies.each{ dep -> println " dep:" + dep.toString()}
+            config.dependencies.each { dep -> println " dep:" + dep.toString() }
             println ' '
         }
+    }
+}
+
+
+jar {
+    enabled(false)
+    archiveClassifier.set('core')
+    dependsOn(shadowJar)
+}
+
+shadowJar {
+    mergeServiceFiles()
+    archiveClassifier.set('')
+    doLast {
+        logger.lifecycle("Shadow jar:" + outputs.files.first())
     }
 }
 
 artifacts {
     archives sourcesJar
     archives javadocJar
+    archives shadowJar
 }
+
+
+// Replace any references to the core jar with the shadowed jar
+PublishArtifact shadowedArtifact = configurations*.artifacts*.find { it.file.name.endsWith("${version}.jar") }.find()
+configurations*.artifacts*.with { artifactSet ->
+    PublishArtifact removeJarArtifact
+    artifactSet.each {
+        if (it.file.name.endsWith('core.jar')) {
+            removeJarArtifact = it
+        }
+    }
+    if (removeJarArtifact) {
+        remove(removeJarArtifact)
+        if (!artifactSet.contains(shadowedArtifact)) {
+            add(shadowedArtifact)
+        }
+    }
+}
+
+project.afterEvaluate {
+    def removePomDep = { MavenPublication pub, NodeList depsNodeList ->
+        depsNodeList['dependency'].each { dep ->
+            if (dep.artifactId.last().value().last() in ["conf"]) {
+                def artifactId = (dep.artifactId.first() as Node).value()
+                def groupId = (dep.groupId.first() as Node).value()
+                logger.info "Removed ${groupId}.${artifactId} from ${pub.name} POM dependency"
+                assert dep.parent().remove(dep)
+            }
+        }
+    }
+
+    publishing.publications*.with(false) { pub ->
+        if (pub instanceof MavenPublication) {
+            pub.pom.withXml {
+                removePomDep(pub, (asNode().get('dependencies') as NodeList))
+            }
+        }
+    }
+}
+
 
 tasks.withType(AbstractPublishToMaven) { publishTask ->
     def printInfo = { AbstractPublishToMaven task, String repoPath ->
         task.publication.with { p ->
             def sb = new StringBuilder()
             p.artifacts.each {
-                String artifactPath = p.groupId.replace(".", "/") + "/" + p.artifactId + "/" + p.version
+                String artifactPath = p.groupId.replace(".", "/") + "/" + p.artifactId + "/" + p.version + "/"
                 sb.append('\n  ' + repoPath).append(artifactPath)
+                        .append(p.artifactId).append('-' + p.version)
                         .append(it.classifier ? '-' + it.classifier : '').append('.' + it.extension)
             }
             logger.lifecycle("Published ${p.groupId}:${p.artifactId}:${p.version}${sb.toString()}")
