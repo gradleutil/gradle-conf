@@ -38,7 +38,6 @@ dependencies {
     implementation "net.gradleutil:conf-gen:${confVer}"
 
     testFixtures "net.gradleutil:conf-gen:${confVer}"
-    testImplementation "net.gradleutil:conf:${confVer}:tests"
     testImplementation "net.gradleutil:conf-gen:${confVer}:test-fixtures"
 }
 configurations.implementation.extendsFrom(configurations.instrumentedClasspath)
