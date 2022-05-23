@@ -23,10 +23,9 @@ def jteDir = layout.buildDirectory.dir("jte-classes")
 def jteSrc = layout.projectDirectory.dir("src/main/groovy/net/gradleutil/gen/")
 
 tasks.precompileJte {
-    sourceDirectory = Paths.get(jteSrc.asFile.toURI())
-    targetDirectory = Paths.get(jteDir.get().asFile.toURI())
+    sourceDirectory = jteSrc
+    targetDirectory = jteDir
     compilePath = sourceSets.main.runtimeClasspath
-    contentType = 'Plain'
 }
 
 jar {
@@ -39,7 +38,7 @@ artifacts {
 
 
 dependencies {
-    implementation 'org.codehaus.groovy:groovy-all:3.0.8'
+    implementation 'org.codehaus.groovy:groovy-all:3.0.10'
     implementation 'net.gradleutil:conf:1.0.8-SNAPSHOT'
     implementation 'net.gradleutil:conf-gen:1.0.8-SNAPSHOT'
     implementation('gg.jte:jte:2.0.3')
