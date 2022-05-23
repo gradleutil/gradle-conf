@@ -1,7 +1,7 @@
 package net.gradleutil.config.task
 
 import net.gradleutil.conf.transform.groovy.SchemaToGroovyClass
-import net.gradleutil.conf.util.ConfUtil
+import net.gradleutil.conf.util.GenUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileType
@@ -36,8 +36,8 @@ abstract class MhfModel extends DefaultTask {
 
         inputChanges.getFileChanges(mhf).each { change ->
             if (change.fileType == FileType.DIRECTORY) return
-            println "${change.changeType}: ${change.normalizedPath}"
-            def jsonSchema = ConfUtil.configFileToReferenceSchemaJson(mhf.get().asFile, modelName.get())
+            println "File change ${change.changeType}: ${change.normalizedPath}"
+            def jsonSchema = GenUtil.configFileToReferenceSchemaJson(mhf.get().asFile, modelName.get())
             def modelFile = new File(getOutputDir().asFile.get(), modelName.get() + '.groovy')
             SchemaToGroovyClass.schemaToSimpleGroovyClass(jsonSchema, packageName.get(), modelName.get(), modelFile)
         }

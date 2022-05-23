@@ -43,9 +43,9 @@ class MhfPlugin implements Plugin<Project> {
                     }
                 })
                 if(project.plugins.findPlugin(JavaBasePlugin)){
+                    project.tasks.getByName('sourcesJar').dependsOn(mhfModelTaskProvider)
                     project.tasks.getByName('compileJava').with {
                         def t = it as JavaCompile
-                        t.options?.annotationProcessorGeneratedSourcesDirectory?.with { mhfModel.outputDir }
                         t.options?.generatedSourceOutputDirectory?.with { mhfModel.outputDir }
                         t.dependsOn(mhfModelTaskProvider)
                     }

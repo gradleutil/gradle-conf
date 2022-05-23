@@ -1,9 +1,8 @@
 package net.gradleutil.config.task
 
-import net.gradleutil.conf.transform.hocon.HoconToSchema
-import net.gradleutil.conf.util.ConfUtil
+
+import net.gradleutil.conf.util.GenUtil
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.FileType
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
@@ -38,7 +37,7 @@ abstract class GenerateConfigSchema extends DefaultTask {
             if (change.changeType == ChangeType.REMOVED) {
                 outputFile.delete()
             } else {
-                ConfUtil.configFileToReferenceSchemaFile(inputFile.get().asFile, refName.get(), outputFile.get().asFile)
+                GenUtil.configFileToReferenceSchemaFile(inputFile.get().asFile, refName.get(), outputFile.get().asFile)
             }
         }
     }

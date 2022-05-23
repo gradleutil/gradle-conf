@@ -1,0 +1,57 @@
+import java.nio.file.Paths
+
+plugins {
+    id 'groovy'
+    id 'maven-publish'
+    id 'net.gradleutil.gradle-jte' version '1.8.2'
+}
+
+configurations {
+    instrumentedJars {
+        canBeConsumed = true
+        canBeResolved = false
+        extendsFrom runtimeOnly
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+def jteDir = layout.buildDirectory.dir("jte-classes")
+def jteSrc = layout.projectDirectory.dir("src/main/groovy/net/gradleutil/gen/")
+
+tasks.precompileJte {
+    sourceDirectory = Paths.get(jteSrc.asFile.toURI())
+    targetDirectory = Paths.get(jteDir.get().asFile.toURI())
+    compilePath = sourceSets.main.runtimeClasspath
+    contentType = 'Plain'
+}
+
+jar {
+    from precompileJte
+}
+
+artifacts {
+    instrumentedJars(jar)
+}
+
+
+dependencies {
+    implementation 'org.codehaus.groovy:groovy-all:3.0.8'
+    implementation 'net.gradleutil:conf:1.0.8-SNAPSHOT'
+    implementation 'net.gradleutil:conf-gen:1.0.8-SNAPSHOT'
+    implementation('gg.jte:jte:2.0.3')
+    implementation('gg.jte:jte-runtime:2.0.3')
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+javadoc {
+    failOnError = false
+}
+
+version = project.version != 'unspecified' ? project.version : file('VERSION').text.trim()

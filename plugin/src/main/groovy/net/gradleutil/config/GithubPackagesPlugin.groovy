@@ -2,6 +2,7 @@ package net.gradleutil.config
 
 
 import groovy.transform.CompileStatic
+import net.gradleutil.conf.dna.common.text.Inflector
 import net.gradleutil.config.extension.GenerateExtension
 import net.gradleutil.config.extension.GithubPackageRepo
 import org.gradle.api.Action
@@ -20,7 +21,6 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
-import org.jboss.dna.common.text.Inflector
 
 import javax.inject.Inject
 

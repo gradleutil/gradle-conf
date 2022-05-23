@@ -1,11 +1,12 @@
 package net.gradleutil.config.extension
 
-import com.typesafe.config.Config
-import com.typesafe.config.ConfigFactory
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import net.gradleutil.conf.Loader
+import net.gradleutil.conf.config.Config
+import net.gradleutil.conf.config.ConfigFactory
 import net.gradleutil.conf.util.ConfUtil
+import net.gradleutil.conf.util.GenUtil
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
@@ -87,7 +88,7 @@ class ConfConfig {
             if (!schemaFile.getAsFile().get().exists()) {
                 log.info "generating schema ${schemaFile.get()}"
                 outputDirectory.getAsFile().get().mkdirs()
-                ConfUtil.configFileToReferenceSchemaFile(conf.getAsFile().get(), rootClassName.get(), schemaFile.getAsFile().get())
+                GenUtil.configFileToReferenceSchemaFile(conf.getAsFile().get(), rootClassName.get(), schemaFile.getAsFile().get())
             }
         }
 

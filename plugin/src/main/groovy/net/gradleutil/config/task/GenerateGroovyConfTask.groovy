@@ -1,10 +1,10 @@
 package net.gradleutil.config.task
 
+import net.gradleutil.conf.json.schema.Schema
 import net.gradleutil.conf.transform.groovy.GroovyConfig
 import net.gradleutil.conf.transform.groovy.SchemaToGroovyClass
 import net.gradleutil.conf.transform.json.JsonToSchema
 import groovy.transform.CompileStatic
-import org.everit.json.schema.Schema
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty

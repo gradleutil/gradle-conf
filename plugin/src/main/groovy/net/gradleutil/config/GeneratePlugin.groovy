@@ -1,13 +1,13 @@
 package net.gradleutil.config
 
 import groovy.transform.CompileStatic
+import net.gradleutil.conf.json.schema.Schema
 import net.gradleutil.conf.transform.groovy.GroovyConfig
 import net.gradleutil.conf.transform.groovy.SchemaToGroovyClass
 import net.gradleutil.conf.transform.json.JsonToSchema
 import net.gradleutil.config.extension.GenerateExtension
 import net.gradleutil.config.task.GenerateConfigSchema
 import net.gradleutil.config.task.GenerateGroovyConfTask
-import org.everit.json.schema.Schema
 import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
@@ -93,7 +93,6 @@ class GeneratePlugin implements Plugin<ExtensionAware> {
                     log.info "has sourcesets"
                     project.tasks.getByName('compileJava').with {
                         def t = it as JavaCompile
-                        t.options?.annotationProcessorGeneratedSourcesDirectory?.with { generateExtension.outputDirectory }
                         t.options?.generatedSourceOutputDirectory?.with { generateExtension.outputDirectory }
                         t.dependsOn(generateGroovyConfTaskTaskProvider)
                     }

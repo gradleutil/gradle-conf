@@ -4,8 +4,6 @@ import gg.jte.TemplateOutput
 import gg.jte.output.StringOutput
 import net.gradleutil.gen.Generator
 
-import static net.gradleutil.conf.util.ConfUtil.getJarSafePath
-
 class GenPluginTemplate {
 
     File confFile
@@ -17,12 +15,12 @@ class GenPluginTemplate {
     File outputDirectory
 
     void write() {
-        def templateEngine = Generator.getTemplateEngine(getJarSafePath(GenPluginTemplate.classLoader, 'jte.gradle.templates.zip'))
 
         def packagePath = packageName.replace('.', '/')
         def srcDirectory = new File(outputDirectory, 'groovy')
         def packageDirectory = new File(srcDirectory, packagePath)
         packageDirectory.mkdirs()
+        def templateEngine = Generator.getTemplateEngine()
 
         TemplateOutput buildGradle = new StringOutput()
         templateEngine.render("settingsplugin/build.gradle.jte", this, buildGradle)

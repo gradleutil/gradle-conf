@@ -11,6 +11,11 @@ plugins{
 }
 
 rootProject.name = 'gradle-conf'
+include('gen')
+project(":gen").name = "gradle-conf-gen"
+include('plugin')
+project(":plugin").name = "gradle-conf-plugin"
+
 /*
 def isIncludedBuild = gradle.parent != null
 if (!isIncludedBuild && file('../conf').exists()) {
