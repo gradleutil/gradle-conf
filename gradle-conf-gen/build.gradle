@@ -37,7 +37,6 @@ tasks.withType(Test).configureEach {
 javadoc {
     failOnError = false
 }
-artifacts{ jar }
 
 group = 'net.gradleutil'
 version = project.version != 'unspecified' ? project.version : file('VERSION').text.trim()

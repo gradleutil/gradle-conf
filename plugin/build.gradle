@@ -19,7 +19,7 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def confVer = '1.1.0'
+def confVer = '1.1.4'
 
 configurations {
     embedded
@@ -28,12 +28,10 @@ configurations {
 dependencies {
 //    implementation project(path: ":gradle-conf-gen")
 
-    //shadow localGroovy()
-    //shadow gradleApi()
     embedded ("net.gradleutil:conf-gen:${confVer}"){
         transitive = false
     }
-    embedded ("net.gradleutil:gradle-conf-gen:${confVer}"){
+    embedded ("net.gradleutil:gradle-conf-gen:1.1.0"){
         transitive = false
     }
     //shadow gradleApi()

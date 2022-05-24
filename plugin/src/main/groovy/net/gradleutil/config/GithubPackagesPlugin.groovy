@@ -2,7 +2,7 @@ package net.gradleutil.config
 
 
 import groovy.transform.CompileStatic
-import net.gradleutil.conf.dna.common.text.Inflector
+import net.gradleutil.conf.util.Inflector
 import net.gradleutil.config.extension.GenerateExtension
 import net.gradleutil.config.extension.GithubPackageRepo
 import org.gradle.api.Action
