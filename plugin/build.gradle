@@ -1,8 +1,8 @@
 plugins {
     id 'groovy-gradle-plugin'
     id 'maven-publish'
-    id "com.gradle.plugin-publish" version "0.11.0"
-    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id "com.gradle.plugin-publish" version "0.12.0"
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 version = project.version != 'unspecified' ? project.version : file('VERSION').text.trim()
@@ -19,42 +19,46 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-
-configurations {
-    instrumentedClasspath {
-        canBeConsumed = false
-        canBeResolved = true
-    }
-}
-
 def confVer = '1.1.0'
 
-dependencies {
-    shadow gradleApi()
-//    shadow 'org.codehaus.groovy:groovy-all:3.0.8'
-
-    instrumentedClasspath(project(path: ":gradle-conf-gen", configuration: 'instrumentedJars'))
-
-    implementation "net.gradleutil:conf-gen:${confVer}"
-
-    testFixtures "net.gradleutil:conf-gen:${confVer}"
-    testImplementation "net.gradleutil:conf-gen:${confVer}:test-fixtures"
+configurations {
+    embedded
 }
-configurations.implementation.extendsFrom(configurations.instrumentedClasspath)
+
+dependencies {
+//    implementation project(path: ":gradle-conf-gen")
+
+    //shadow localGroovy()
+    //shadow gradleApi()
+    embedded ("net.gradleutil:conf-gen:${confVer}"){
+        transitive = false
+    }
+    embedded ("net.gradleutil:gradle-conf-gen:${confVer}"){
+        transitive = false
+    }
+    //shadow gradleApi()
+    //shadow 'org.codehaus.groovy:groovy-all:3.0.10'
+
+    testFixtures ("net.gradleutil:conf-gen:${confVer}")
+    testImplementation ("net.gradleutil:conf-gen:${confVer}:test-fixtures")
+}
+
+configurations.implementation.extendsFrom(configurations.embedded)
 gradlePlugin.testSourceSets(sourceSets.testPlugin)
-configurations.testImplementation.extendsFrom(configurations.shadow)
+configurations.testImplementation.extendsFrom(configurations.embedded)
 configurations.testPluginImplementation.extendsFrom(configurations.testImplementation)
+
 
 
 testing{
     suites{
         test{
-            useSpock( '2.0-groovy-3.0' )
+            useSpock( '2.1-groovy-3.0' )
         }
         testImplementation( JvmTestSuite ){
-            useSpock( '2.0-groovy-3.0' )
+            useSpock( '2.1-groovy-3.0' )
             dependencies{
-                implementation project
+//                implementation project
             }
 
             targets{
@@ -141,12 +145,11 @@ jar {
 }
 
 shadowJar {
+    configurations = [project.configurations.embedded]
     mergeServiceFiles()
+    mergeGroovyExtensionModules()
+    minimize()
     archiveClassifier.set('')
-    minimize {
-        exclude(dependency('net.gradleutil:.*:.*'))
-        exclude(project(":gradle-conf-gen"))
-    }
     doLast {
         def jarFile = outputs.files.first() as File
         def formatStr = "%,10.2f"

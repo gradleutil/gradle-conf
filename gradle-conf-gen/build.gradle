@@ -1,0 +1,73 @@
+import gg.jte.ContentType
+plugins {
+    id 'groovy'
+    id 'maven-publish'
+    id "gg.jte.gradle" version "2.0.3"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+}
+
+jte {
+    precompile()
+    setContentType(ContentType.Plain)
+}
+
+jar {
+    dependsOn precompileJte
+    from fileTree("jte-classes") {
+        include "**/*.class"
+        include "**/*.bin" // Only required if you use binary templates
+    }
+}
+
+dependencies {
+    implementation 'org.codehaus.groovy:groovy-all:3.0.10'
+    implementation 'net.gradleutil:conf-gen:1.1.0'
+    implementation('gg.jte:jte-runtime:2.0.3')
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+javadoc {
+    failOnError = false
+}
+artifacts{ jar }
+
+group = 'net.gradleutil'
+version = project.version != 'unspecified' ? project.version : file('VERSION').text.trim()
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+tasks.withType(AbstractPublishToMaven) { publishTask ->
+    doLast {
+        if (publishTask instanceof PublishToMavenRepository) {
+            logger.lifecycle("Published ${project.group}.${project.name}:${version} to ${publishTask.repository.url}")
+        } else if (publishTask instanceof PublishToMavenLocal) {
+            String repoPath = repositories.mavenLocal().url.toURL().getFile()
+            publication.with { p ->
+                def sb = new StringBuilder()
+                p.artifacts.each {
+                    String artifactPath = p.groupId.replace(".", "/") + "/" + p.artifactId + "/" + p.version + "/" +
+                            p.artifactId + "-" + p.version
+                    sb.append('\n  ' + repoPath).append(artifactPath)
+                            .append(it.classifier ? '-' + it.classifier : '').append('.' + it.extension)
+                }
+                logger.lifecycle("Published ${p.groupId}:${p.artifactId}:${p.version}${sb.toString()}")
+            }
+        } else {
+            logger.lifecycle("Published ${project.group}:${project.name}:${version}")
+        }
+    }
+}

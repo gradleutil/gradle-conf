@@ -6,13 +6,8 @@ pluginManagement{
     }
 }
 
-plugins{
-    id( 'net.gradleutil.gradle-conf' ) version( '1.0.9' )
-}
-
 rootProject.name = 'gradle-conf'
-include('gen')
-project(":gen").name = "gradle-conf-gen"
+includeBuild('gradle-conf-gen')
 include('plugin')
 project(":plugin").name = "gradle-conf-plugin"
 
