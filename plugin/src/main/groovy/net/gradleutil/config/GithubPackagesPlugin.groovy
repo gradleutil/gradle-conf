@@ -2,8 +2,6 @@ package net.gradleutil.config
 
 
 import groovy.transform.CompileStatic
-import net.gradleutil.conf.util.Inflector
-import net.gradleutil.config.extension.GenerateExtension
 import net.gradleutil.config.extension.GithubPackageRepo
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
@@ -28,7 +26,6 @@ import javax.inject.Inject
 class GithubPackagesPlugin implements Plugin<ExtensionAware> {
 
     static final Logger log = Logging.getLogger(this)
-    static final Inflector inflector = new Inflector()
 
     final ObjectFactory objectFactory
     final NamedDomainObjectContainer<GithubPackageRepo> githubPackageRepos
