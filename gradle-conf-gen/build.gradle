@@ -25,9 +25,9 @@ jar {
 }
 
 dependencies {
-    implementation 'org.codehaus.groovy:groovy-all:3.0.10'
+    implementation 'org.codehaus.groovy:groovy-all:' + config.versions.groovy
     implementation 'net.gradleutil:conf-gen:1.1.0'
-    implementation('gg.jte:jte-runtime:2.0.3')
+    implementation('gg.jte:jte-runtime:' + config.versions.jte )
 }
 
 tasks.withType(Test).configureEach {
@@ -38,7 +38,7 @@ javadoc {
     failOnError = false
 }
 
-group = 'net.gradleutil'
+group = config.group
 version = project.version != 'unspecified' ? project.version : file('VERSION').text.trim()
 
 publishing {

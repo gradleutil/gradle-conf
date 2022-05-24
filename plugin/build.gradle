@@ -19,7 +19,7 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def confVer = '1.1.5'
+def confVer = '1.1.6'
 
 configurations {
     embedded
