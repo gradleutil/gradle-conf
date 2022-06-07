@@ -52,6 +52,7 @@ class ConfSettingsPlugin implements Plugin<Settings> {
                 settingsPlugin.rootClassName.set(confConfig.rootClassName)
                 settingsPlugin.packageName.set(confConfig.packageName)
                 settingsPlugin.sourceConf.set(confConfig.conf)
+                settingsPlugin.classLoader.set(ConfSettingsPlugin.classLoader)
                 settingsPlugin.apply(settings)
             }
             gradleExt.add('confConfig', confConfig)

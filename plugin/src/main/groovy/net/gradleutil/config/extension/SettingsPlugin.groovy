@@ -29,6 +29,7 @@ class SettingsPlugin {
     Property<String> packageName
     Property<String> rootClassName
     Property<String> schemaName
+    Property<ClassLoader> classLoader
 
     @Inject
     SettingsPlugin(ObjectFactory objects) {
@@ -39,6 +40,7 @@ class SettingsPlugin {
         rootClassName = objects.property(String).convention('Config')
         schemaName = objects.property(String)
         outputDirectory = objects.directoryProperty()
+        classLoader = objects.property(ClassLoader)
     }
 
     void apply(Settings settings) {
@@ -71,7 +73,7 @@ class SettingsPlugin {
         def rootClassName = rootClassName.get()
         def srcDirectory = new File(outputDirectory, 'groovy')
         def dslFile = new File(srcDirectory, packagePath + '/' + rootClassName + 'DSL.groovy')
-        String confVersion = '1.0.8-SNAPSHOT'
+        String confVersion = '1.0.6'
 
         String pluginId = "${packageName}.${rootClassName.toLowerCase()}"
         String implementationClass = "${packageName}.${rootClassName}Plugin"
@@ -79,6 +81,9 @@ class SettingsPlugin {
         log.info("Generating SettingsPlugin from file://${schemaFile} to file://${dslFile}")
 
         def genPluginTemplate = new net.gradleutil.gen.settingsplugin.GenPluginTemplate()
+        if(classLoader.isPresent()){
+            genPluginTemplate.setClassLoader(classLoader.get())
+        }
         genPluginTemplate.setPluginId(pluginId)
         genPluginTemplate.setConfVersion(confVersion)
         genPluginTemplate.setConfFile(sourceConf.getAsFile().get())
@@ -88,8 +93,10 @@ class SettingsPlugin {
         genPluginTemplate.setOutputDirectory(outputDirectory)
         genPluginTemplate.write()
 
+        def options = SchemaToGroovyClass.defaultOptions().jsonSchema(schemaFile.text).packageName(packageName).rootClassName(rootClassName).outputFile(dslFile)
+        options.classLoader(classLoader.get())
 
-        SchemaToGroovyClass.schemaToSimpleGroovyClass(schemaFile.text, packageName, rootClassName, dslFile)
+        SchemaToGroovyClass.schemaToSimpleGroovyClass(options)
 //        def result = GroovyConfig.toGroovyDsl(JsonConfig.getSchema(schemaFile.text, true), rootClassName, packageName+'.groovydsl')
 //        new File(srcDirectory, packagePath + '/' + 'groovydsl' + '/' + rootClassName + 'GroovyDSL.groovy').tap{it.parentFile.mkdirs()}.text = result
 

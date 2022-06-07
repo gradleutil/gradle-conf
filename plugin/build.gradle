@@ -19,7 +19,7 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def confVer = '1.1.6'
+def confVer = '1.1.7'
 
 configurations {
     embedded
@@ -45,8 +45,6 @@ configurations.implementation.extendsFrom(configurations.embedded)
 gradlePlugin.testSourceSets(sourceSets.testPlugin)
 configurations.testImplementation.extendsFrom(configurations.embedded)
 configurations.testPluginImplementation.extendsFrom(configurations.testImplementation)
-
-
 
 testing{
     suites{
@@ -106,6 +104,7 @@ pluginBundle {
 task testPlugin(type: Test, group: 'tests') {
     testClassesDirs = sourceSets.testPlugin.output.classesDirs
     classpath = sourceSets.testPlugin.runtimeClasspath
+    useJUnitPlatform()
 }
 
 tasks.withType(Test) {
@@ -119,7 +118,7 @@ tasks.withType(Test) {
 
 check {
     group = 'tests'
-    dependsOn(tasks.testPlugin)
+//    dependsOn(tasks.testPlugin)
 }
 
 task artifactList {
@@ -146,7 +145,9 @@ shadowJar {
     configurations = [project.configurations.embedded]
     mergeServiceFiles()
     mergeGroovyExtensionModules()
-    minimize()
+    minimize {
+        exclude(dependency('net.gradleutil:.*'))
+    }
     archiveClassifier.set('')
     doLast {
         def jarFile = outputs.files.first() as File

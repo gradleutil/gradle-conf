@@ -1,8 +1,6 @@
-import gg.jte.ContentType
 plugins {
     id 'groovy'
     id 'maven-publish'
-    id "gg.jte.gradle" version "2.0.3"
 }
 
 repositories {
@@ -11,23 +9,17 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-jte {
-    precompile()
-    setContentType(ContentType.Plain)
-}
-
 jar {
-    dependsOn precompileJte
-    from fileTree("jte-classes") {
-        include "**/*.class"
-        include "**/*.bin" // Only required if you use binary templates
+    def jtedir = layout.buildDirectory.dir('jteFiles')
+    doFirst{
+//        net.gradleutil.gen.Generator.compile(file('src/main/jte').toPath(), jtedir.get().asFile.toPath())
     }
+    from jtedir
 }
 
 dependencies {
     implementation 'org.codehaus.groovy:groovy-all:' + config.versions.groovy
-    implementation 'net.gradleutil:conf-gen:1.1.0'
-    implementation('gg.jte:jte-runtime:' + config.versions.jte )
+    implementation 'net.gradleutil:conf-gen:1.1.7'
 }
 
 tasks.withType(Test).configureEach {

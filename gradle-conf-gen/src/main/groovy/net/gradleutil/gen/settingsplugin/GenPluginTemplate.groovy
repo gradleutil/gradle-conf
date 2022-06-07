@@ -13,6 +13,7 @@ class GenPluginTemplate {
     String packageName
     String rootClassName
     File outputDirectory
+    ClassLoader classLoader
 
     void write() {
 
@@ -20,7 +21,9 @@ class GenPluginTemplate {
         def srcDirectory = new File(outputDirectory, 'groovy')
         def packageDirectory = new File(srcDirectory, packagePath)
         packageDirectory.mkdirs()
-        def templateEngine = Generator.getTemplateEngine()
+
+        def opt = Generator.defaultOptions().classLoader(GenPluginTemplate.classLoader)
+        def templateEngine = Generator.getTemplateEngine(opt)
 
         TemplateOutput buildGradle = new StringOutput()
         templateEngine.render("settingsplugin/build.gradle.jte", this, buildGradle)
