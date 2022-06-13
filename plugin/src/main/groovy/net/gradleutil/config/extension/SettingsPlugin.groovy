@@ -73,7 +73,7 @@ class SettingsPlugin {
         def rootClassName = rootClassName.get()
         def srcDirectory = new File(outputDirectory, 'groovy')
         def dslFile = new File(srcDirectory, packagePath + '/' + rootClassName + 'DSL.groovy')
-        String confVersion = '1.0.6'
+        String confVersion = '1.1.7'
 
         String pluginId = "${packageName}.${rootClassName.toLowerCase()}"
         String implementationClass = "${packageName}.${rootClassName}Plugin"

@@ -6,5 +6,5 @@ import net.gradleutil.conf.Loader
 
 @CompileStatic
 class loaded {
-    ${gen.getRootClassName()} example = Loader.create(new File('${gen.getConfFile().getAbsolutePath()}').text, ${gen.getRootClassName()})
+    static final ${gen.getRootClassName()} config = Loader.create(new File('${gen.getConfFile().getAbsolutePath()}').text, ${gen.getRootClassName()})
 }

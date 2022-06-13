@@ -1,7 +1,9 @@
 @param net.gradleutil.gen.settingsplugin.GenPluginTemplate gen
-plugins{ id('groovy-gradle-plugin') }
+plugins{
+    id('groovy-gradle-plugin')
+}
 version = '1.0.0'
-buildscript.dependencies.classpath files("${gen.getConfFile().getAbsolutePath()}")
+//buildscript.dependencies.classpath files("${gen.getConfFile().getAbsolutePath()}")
 
 sourceSets.main.groovy.srcDirs = ['groovy']
 sourceSets.main.java.srcDirs = []
@@ -15,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    implementation "net.gradleutil:conf:${gen.getConfVersion()}"
+    implementation "net.gradleutil:conf-gen:${gen.getConfVersion()}"
 }
 
 gradlePlugin {

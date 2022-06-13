@@ -1,7 +1,6 @@
 package net.gradleutil.config
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
@@ -11,7 +10,6 @@ import org.gradle.api.plugins.PluginAware
 
 import javax.inject.Inject
 
-@Slf4j
 @CompileStatic
 class ConfPlugin implements Plugin<ExtensionAware> {
 

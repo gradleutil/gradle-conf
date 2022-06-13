@@ -19,7 +19,7 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def confVer = '1.1.7'
+def confVer = '1.1.8'
 
 configurations {
     embedded
@@ -31,7 +31,7 @@ dependencies {
     embedded ("net.gradleutil:conf-gen:${confVer}"){
         transitive = false
     }
-    embedded ("net.gradleutil:gradle-conf-gen:1.1.0"){
+    embedded ("net.gradleutil:gradle-conf-gen:1.1.1"){
         transitive = false
     }
     //shadow gradleApi()
@@ -118,7 +118,7 @@ tasks.withType(Test) {
 
 check {
     group = 'tests'
-//    dependsOn(tasks.testPlugin)
+    dependsOn(tasks.testPlugin)
 }
 
 task artifactList {
@@ -145,9 +145,6 @@ shadowJar {
     configurations = [project.configurations.embedded]
     mergeServiceFiles()
     mergeGroovyExtensionModules()
-    minimize {
-        exclude(dependency('net.gradleutil:.*'))
-    }
     archiveClassifier.set('')
     doLast {
         def jarFile = outputs.files.first() as File
