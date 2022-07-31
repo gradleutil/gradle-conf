@@ -40,6 +40,11 @@ class ConfPluginFunctionalTest extends Specification {
         def projectDir = new File("build/functionalTest")
         projectDir.deleteDir()
         projectDir.mkdirs()
+        def subprojects = ['sub1', 'sub2','sub3']
+        subprojects.each {name ->
+            def subprojectDir = new File(projectDir, name).tap { it.mkdir() }
+            new File(subprojectDir, "build.gradle").text = ''
+        }
         def configFile = new File(projectDir, "someConfig.conf") << "someOption=someValue"
         new File(projectDir, "build.gradle") << ""
         new File(projectDir, "settings.gradle") << """
@@ -49,6 +54,7 @@ class ConfPluginFunctionalTest extends Specification {
             confConfig{
                 conf = file('${configFile.name}')
             }
+            include('sub1','sub2','sub2','sub3')
         """
 
         when:

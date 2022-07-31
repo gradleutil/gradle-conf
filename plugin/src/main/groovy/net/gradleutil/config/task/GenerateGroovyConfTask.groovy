@@ -1,9 +1,9 @@
 package net.gradleutil.config.task
 
 import net.gradleutil.conf.json.schema.Schema
+import net.gradleutil.conf.json.schema.SchemaUtil
 import net.gradleutil.conf.transform.groovy.GroovyConfig
 import net.gradleutil.conf.transform.groovy.SchemaToGroovyClass
-import net.gradleutil.conf.transform.json.JsonToSchema
 import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -88,7 +88,7 @@ class GenerateGroovyConfTask extends DefaultTask {
             throw new IllegalArgumentException("Schema file ${file} does not exist")
         }
         try {
-            return JsonToSchema.getSchema(file.text)
+            return SchemaUtil.getSchema(file.text)
         } catch (Exception e) {
             logger.error("Error loading schema: ${e.message}")
         }

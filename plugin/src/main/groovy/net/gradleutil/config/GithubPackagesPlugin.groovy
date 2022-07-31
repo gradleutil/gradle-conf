@@ -79,6 +79,9 @@ class GithubPackagesPlugin implements Plugin<ExtensionAware> {
             return
         }
         project.allprojects { Project p ->
+            if((p.plugins.findPlugin(ConfPlugin) as ConfPlugin)?.evaluatedProjects?.contains(p.name)){
+                return
+            }
             p.apply plugin: 'maven-publish'
             p.afterEvaluate {
                 getGithubPackageRepos().each {

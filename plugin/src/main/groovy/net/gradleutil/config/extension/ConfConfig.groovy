@@ -54,7 +54,7 @@ class ConfConfig {
         packageName = objectFactory.property(String).convention('config')
         rootClassName = objectFactory.property(String).convention('Config')
         schemaName = objectFactory.property(String).convention('Config')
-        schemaFile = objectFactory.fileProperty().convention(outputDirectory.file("schemas.json"))
+        schemaFile = objectFactory.fileProperty()//.convention(outputDirectory.file("schemas.json"))
         conf = objectFactory.fileProperty()
         confOverride = objectFactory.fileProperty()
         allowUnresolved = objectFactory.property(Boolean).convention(true)

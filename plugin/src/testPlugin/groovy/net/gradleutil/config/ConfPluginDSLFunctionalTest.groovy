@@ -5,8 +5,7 @@ import org.gradle.testkit.runner.GradleRunner
 import spock.lang.Specification
 
 /**
- * A simple functional test for the plugin.
- */
+ * A simple functional test for the plugin.*/
 class ConfPluginDSLFunctionalTest extends Specification {
 
     def "generate config bean"() {
@@ -30,14 +29,14 @@ class ConfPluginDSLFunctionalTest extends Specification {
                 rootClassName.set 'Booklist'
                 schemaFile.set file('config.schema.json')
             }
-        """
+        """.stripIndent()
         new File(projectDir, "build.gradle") << """
-        //plugins { id 'config.config' }
-        //import config.Config
-        afterEvaluate{
-//            println config.books
-        }
-        """
+            //plugins { id 'config.config' }
+            //import config.Config
+            afterEvaluate{
+                println config.books
+            }
+        """.stripIndent()
 
         when:
         def runner = GradleRunner.create()
@@ -56,7 +55,7 @@ class ConfPluginDSLFunctionalTest extends Specification {
     def "generate settings model bean"() {
         given:
         def projectDir = new File("build/functionalTest")
-        def jsonSchema =  new File('src/testPlugin/resources/json/')
+        def jsonSchema = new File('src/testPlugin/resources/json/')
         projectDir.deleteDir()
         projectDir.mkdirs()
         new File(projectDir, "configConf.conf").text = new File('src/testPlugin/resources/json/veggies.json').text
@@ -98,11 +97,11 @@ class ConfPluginDSLFunctionalTest extends Specification {
     def "generate model bean"() {
         given:
         def projectDir = new File("build/functionalTest")
-        def jsonSchema =  new File('src/testPlugin/resources/json/')
+        def jsonSchema = new File('src/testPlugin/resources/json/')
         projectDir.deleteDir()
         projectDir.mkdirs()
         new File(projectDir, "configConf.conf").text = new File('src/testPlugin/resources/json/veggies.json').text
-//        new File(projectDir, "config.schema").text = new File('src/testPlugin/resources/json/veggies.schema.json').text
+        //        new File(projectDir, "config.schema").text = new File('src/testPlugin/resources/json/veggies.schema.json').text
         new File(projectDir, "settings.gradle") << """
             plugins {
                 id('net.gradleutil.gradle-conf')
@@ -136,13 +135,13 @@ class ConfPluginDSLFunctionalTest extends Specification {
         def result = runner.build()
 
         then:
-        new File(projectDir,'build/conf-generated').exists()
+        new File(projectDir, 'build/conf-generated').exists()
     }
 
     def "generate mhf jar"() {
         given:
         def projectDir = new File("build/functionalTest")
-        def jsonSchema =  new File('src/testPlugin/resources/json/')
+        def jsonSchema = new File('src/testPlugin/resources/json/')
         projectDir.deleteDir()
         projectDir.mkdirs()
         new File(projectDir, "configConf.conf").text = new File('src/testPlugin/resources/json/veggies.json').text
@@ -158,7 +157,6 @@ class ConfPluginDSLFunctionalTest extends Specification {
             mhfModel{
                 myModel {
                    mhf = file('configConf.conf')
-                   modelName = 'MoModel'
                    packageName = 'org.mo'
                 }
             }
@@ -173,7 +171,38 @@ class ConfPluginDSLFunctionalTest extends Specification {
         def result = runner.build()
 
         then:
-        new File(projectDir,'build/mhf-content').exists()
+        new File(projectDir, 'build/mhf-content').exists()
+    }
+
+    def "generate jsonSchema"() {
+        given:
+        def projectDir = new File("build/functionalTest")
+        def jsonSchemaDir = new File(projectDir,'json')
+        [projectDir, jsonSchemaDir].each { it.deleteDir(); it.mkdirs() }
+        new File(jsonSchemaDir, "veggies.schema.json").text = new File('src/testPlugin/resources/json/veggies.schema.json').text
+        new File(projectDir, "settings.gradle") << """
+            plugins {
+                id('net.gradleutil.gradle-conf')
+            }
+        """.stripIndent()
+        new File(projectDir, "build.gradle") << """
+            jsonSchemaModel {
+                "net.gradleutil.gradleconf" {
+                   schemaDir = file('json/')
+                }
+            }
+        """.stripIndent()
+
+        when:
+        def runner = GradleRunner.create()
+        runner.forwardOutput()
+        runner.withPluginClasspath()
+        runner.withArguments("assemble", "-Si")
+        runner.withProjectDir(projectDir)
+        def result = runner.build()
+
+        then:
+        new File(projectDir, 'build/jsm-content').exists()
     }
 
 

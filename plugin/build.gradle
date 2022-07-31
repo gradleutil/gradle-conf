@@ -7,10 +7,11 @@ plugins {
 
 version = project.version != 'unspecified' ? project.version : file('VERSION').text.trim()
 group = 'net.gradleutil'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 sourceSets {
-    testPlugin {
-    }
+    testPlugin {}
 }
 
 repositories {
@@ -19,26 +20,27 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def confVer = '1.1.8'
+def confGenVer = '1.1.9'
 
 configurations {
     embedded
 }
 
 dependencies {
-//    implementation project(path: ":gradle-conf-gen")
+    //    implementation project(path: ":gradle-conf-gen")
 
-    embedded ("net.gradleutil:conf-gen:${confVer}"){
+    embedded("net.gradleutil:conf-gen:${confGenVer}") {
         transitive = false
     }
-    embedded ("net.gradleutil:gradle-conf-gen:1.1.1"){
+    embedded("net.gradleutil:gradle-conf-gen:1.1.2") {
         transitive = false
     }
+
     //shadow gradleApi()
     //shadow 'org.codehaus.groovy:groovy-all:3.0.10'
 
-    testFixtures ("net.gradleutil:conf-gen:${confVer}")
-    testImplementation ("net.gradleutil:conf-gen:${confVer}:test-fixtures")
+    testFixtures("net.gradleutil:conf-gen:${confGenVer}")
+    testImplementation("net.gradleutil:conf-gen:${confGenVer}:test-fixtures")
 }
 
 configurations.implementation.extendsFrom(configurations.embedded)
@@ -46,20 +48,20 @@ gradlePlugin.testSourceSets(sourceSets.testPlugin)
 configurations.testImplementation.extendsFrom(configurations.embedded)
 configurations.testPluginImplementation.extendsFrom(configurations.testImplementation)
 
-testing{
-    suites{
-        test{
-            useSpock( '2.1-groovy-3.0' )
+testing {
+    suites {
+        test {
+            useSpock('2.1-groovy-3.0')
         }
-        testImplementation( JvmTestSuite ){
-            useSpock( '2.1-groovy-3.0' )
-            dependencies{
-//                implementation project
+        testImplementation(JvmTestSuite) {
+            useSpock('2.1-groovy-3.0')
+            dependencies {
+                //                implementation project
             }
 
-            targets{
-                all{
-                    testTask.configure{ shouldRunAfter( test ) }
+            targets {
+                all {
+                    testTask.configure { shouldRunAfter(test) }
                 }
             }
         }
@@ -104,6 +106,7 @@ pluginBundle {
 task testPlugin(type: Test, group: 'tests') {
     testClassesDirs = sourceSets.testPlugin.output.classesDirs
     classpath = sourceSets.testPlugin.runtimeClasspath
+    systemProperty 'confGenVer', confGenVer
     useJUnitPlatform()
 }
 
@@ -111,7 +114,7 @@ tasks.withType(Test) {
     // Show test results.
     group = 'tests'
     testLogging { it.events "passed", "skipped", "failed" }
-//    testLogging.showStandardStreams = true
+    //    testLogging.showStandardStreams = true
     testLogging.showCauses = true
     testLogging.exceptionFormat('full')
 }
@@ -125,7 +128,7 @@ task artifactList {
     group = "Help"
     description = "Displays the artifacts associated with each configuration of " + project
     doFirst {
-        configurations.findAll().each { config ->
+        configurations.each { config ->
             println "${config}:"
             config.allArtifacts.getFiles().each { file -> println " " + file }
             config.dependencies.each { dep -> println " dep:" + dep.toString() }

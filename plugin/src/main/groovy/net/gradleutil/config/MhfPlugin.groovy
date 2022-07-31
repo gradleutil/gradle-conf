@@ -32,26 +32,17 @@ class MhfPlugin implements Plugin<Project> {
         mhfModels = objectFactory.domainObjectContainer(net.gradleutil.config.extension.MhfModel.class)
 
         configurationActionContainer.add {
-            mhfModels.each{mhfModel ->
-                TaskProvider<MhfModel> mhfModelTaskProvider = project.getTasks().register("mhfModel${it.name}", MhfModel.class, new Action<MhfModel>() {
+            mhfModels.each{model ->
+                TaskProvider<MhfModel> provider = project.getTasks().register("mhfModel${it.name}", MhfModel.class, new Action<MhfModel>() {
                     void execute(MhfModel modelTask) {
                         modelTask.group = 'mhf'
-                        modelTask.outputDir.set(mhfModel.outputDir ?: project.layout.buildDirectory.dir('mhf-content'))
-                        modelTask.mhf.set(mhfModel.mhf)
-                        modelTask.modelName.set(mhfModel.modelName)
-                        modelTask.packageName.set(mhfModel.packageName ?: project.group.toString())
+                        modelTask.outputDir.set(model.outputDir ?: project.layout.buildDirectory.dir('mhf-content'))
+                        modelTask.mhf.set(model.mhf)
+                        modelTask.modelName.set(model.name)
+                        modelTask.packageName.set(model.packageName ?: project.group.toString())
                     }
                 })
-                if(project.plugins.findPlugin(JavaBasePlugin)){
-                    project.tasks.getByName('sourcesJar').dependsOn(mhfModelTaskProvider)
-                    project.tasks.getByName('compileJava').with {
-                        def t = it as JavaCompile
-                        t.options?.generatedSourceOutputDirectory?.with { mhfModel.outputDir }
-                        t.dependsOn(mhfModelTaskProvider)
-                    }
-                } else {
-                    project.assemble.dependsOn(mhfModelTaskProvider)
-                }
+                GeneratePlugin.addGenerationHooks(project, provider, model.outputDir)
             }
         }
     }

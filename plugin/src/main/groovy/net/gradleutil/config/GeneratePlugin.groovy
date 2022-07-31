@@ -2,9 +2,9 @@ package net.gradleutil.config
 
 import groovy.transform.CompileStatic
 import net.gradleutil.conf.json.schema.Schema
+import net.gradleutil.conf.json.schema.SchemaUtil
 import net.gradleutil.conf.transform.groovy.GroovyConfig
 import net.gradleutil.conf.transform.groovy.SchemaToGroovyClass
-import net.gradleutil.conf.transform.json.JsonToSchema
 import net.gradleutil.config.extension.GenerateExtension
 import net.gradleutil.config.task.GenerateConfigSchema
 import net.gradleutil.config.task.GenerateGroovyConfTask
@@ -18,6 +18,7 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.GroovyPlugin
+import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.PluginAware
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.compile.JavaCompile
@@ -102,8 +103,6 @@ class GeneratePlugin implements Plugin<ExtensionAware> {
                         it.generatedSourceDirs.add(generateExtension.outputDirectory)
                     }
                 }
-                project.afterEvaluate {
-                }
             }
         }
     }
@@ -137,7 +136,7 @@ class GeneratePlugin implements Plugin<ExtensionAware> {
             throw new IllegalArgumentException("Schema file ${file} does not exist")
         }
         try {
-            return JsonToSchema.getSchema(file.text)
+            return SchemaUtil.getSchema(file.text)
         } catch (Exception e) {
             log.error("Error loading schema: ${e.message}")
         }
@@ -155,6 +154,26 @@ class GeneratePlugin implements Plugin<ExtensionAware> {
         } else if (pluginContainer instanceof Project) {
             pluginContainer.afterEvaluate closure
         }
+    }
+
+    static addGenerationHooks(Project project, TaskProvider mhfModelTaskProvider, File outputDir){
+        if (project.plugins.findPlugin(JavaBasePlugin)) {
+            project.tasks.findByName('sourcesJar')?.dependsOn(mhfModelTaskProvider)
+            project.tasks.getByName('compileJava').with {
+                def t = it as JavaCompile
+                t.options?.generatedSourceOutputDirectory?.with { outputDir }
+                t.dependsOn(mhfModelTaskProvider)
+            }
+            /*
+            println "adding resources to classpath (for IDEs and not working so far so ¯\_(ツ)_/¯)"
+            SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
+            sourceSets.create("jsonSchema").getResources().srcDir(jsonSchemaModel.outputDir);
+            sourceSets.each { println it }
+            */
+        } else {
+            project.tasks.getByName('assemble').dependsOn(mhfModelTaskProvider)
+        }
+
     }
 
 }

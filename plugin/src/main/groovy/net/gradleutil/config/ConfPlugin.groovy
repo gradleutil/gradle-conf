@@ -14,6 +14,7 @@ import javax.inject.Inject
 class ConfPlugin implements Plugin<ExtensionAware> {
 
     private final ObjectFactory objectFactory
+    final Set<String> evaluatedProjects = []
 
     @Inject
     ConfPlugin(ObjectFactory objectFactory) {
@@ -27,6 +28,9 @@ class ConfPlugin implements Plugin<ExtensionAware> {
         if (container instanceof Project) {
             container.plugins.apply(ConfProjectPlugin)
             container.plugins.apply(MhfPlugin)
+            container.plugins.apply(JsonSchemaModelPlugin)
+            container.plugins.apply(JteModelPlugin)
+            evaluatedProjects.add(container.name)
         } else if (container instanceof Settings) {
             container.plugins.apply(ConfSettingsPlugin)
         }

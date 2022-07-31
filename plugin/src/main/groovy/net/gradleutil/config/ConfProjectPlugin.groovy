@@ -8,9 +8,12 @@ import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.DependencyResolutionListener
+import org.gradle.api.artifacts.ResolvableDependencies
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.compile.JavaCompile
@@ -54,6 +57,32 @@ class ConfProjectPlugin implements Plugin<Project> {
         confConfig.configProperty.set project.providers.provider {
             confConfig.load().config
         }
+
+        /*
+        project.afterEvaluate { Project p ->
+            p.tasks.getByName('javaCompile').doFirst { JavaCompile variant ->
+                def jarPath = ConfProjectPlugin.getProtectionDomain().getCodeSource().getLocation().toURI().path
+                variant.classpath.plus p.files(jarPath)
+            }
+        }
+        */
+
+        /*
+        project.afterEvaluate {
+            project.gradle.addListener(new DependencyResolutionListener() {
+                @Override
+                void beforeResolve(ResolvableDependencies resolvableDependencies) {
+                    def jarPath = ConfProjectPlugin.getProtectionDomain().getCodeSource().getLocation().toURI().path
+                    def compileDeps = project.configurations.getByName("implementation").getDependencies()
+                    compileDeps.add(project.getDependencies().create(project.files(jarPath)))
+                    project.getGradle().removeListener(this)
+                }
+
+                @Override
+                void afterResolve(ResolvableDependencies resolvableDependencies) {}
+            })
+        }
+        */
 
         project.extensions.add('configProperty', confConfig.configProperty)
 
