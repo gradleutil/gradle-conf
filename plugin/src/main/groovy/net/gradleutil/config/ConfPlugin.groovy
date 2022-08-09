@@ -34,8 +34,9 @@ class ConfPlugin implements Plugin<ExtensionAware> {
         } else if (container instanceof Settings) {
             container.plugins.apply(ConfSettingsPlugin)
         }
-        container.plugins.apply(GithubPackagesPlugin)
         container.plugins.apply(GeneratePlugin)
+        container.plugins.apply(GithubPackagesPlugin)
+        container.plugins.apply(GitLabPackagesPlugin)
     }
 
 }

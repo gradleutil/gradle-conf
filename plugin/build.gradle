@@ -20,7 +20,8 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def confGenVer = '1.1.9'
+def confGenVer = '1.1.10'
+System.properties.setProperty('confGenVer',confGenVer)
 
 configurations {
     embedded
@@ -32,7 +33,7 @@ dependencies {
     embedded("net.gradleutil:conf-gen:${confGenVer}") {
         transitive = false
     }
-    embedded("net.gradleutil:gradle-conf-gen:1.1.2") {
+    embedded("net.gradleutil:gradle-conf-gen:+") {
         transitive = false
     }
 

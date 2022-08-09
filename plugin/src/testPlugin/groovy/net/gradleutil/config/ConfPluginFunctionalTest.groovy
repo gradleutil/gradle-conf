@@ -35,27 +35,36 @@ class ConfPluginFunctionalTest extends Specification {
         json == [:]
     }
 
-    def "settings"() {
+    def "settings confConfig"() {
         given:
         def projectDir = new File("build/functionalTest")
         projectDir.deleteDir()
         projectDir.mkdirs()
         def subprojects = ['sub1', 'sub2','sub3']
-        subprojects.each {name ->
-            def subprojectDir = new File(projectDir, name).tap { it.mkdir() }
-            new File(subprojectDir, "build.gradle").text = ''
-        }
         def configFile = new File(projectDir, "someConfig.conf") << "someOption=someValue"
-        new File(projectDir, "build.gradle") << ""
-        new File(projectDir, "settings.gradle") << """
+        new File(projectDir, "config.schema.json").text = new File('src/testPlugin/resources/json/veggies.schema.json').text
+        String SETTINGS =  """
             plugins {
                 id('net.gradleutil.gradle-conf')
             }
             confConfig{
                 conf = file('${configFile.name}')
+                schemaFile.set file('config.schema.json')
+                generateBean.set true
+                silent.set false
+                outputDirectory.set new File(rootDir,'src/dsl')
+                rootClassName.set 'Booklist'
             }
             include('sub1','sub2','sub2','sub3')
-        """
+        """.stripIndent()
+        String BUILD = """
+        """.stripIndent()
+        new File(projectDir, "build.gradle").text = ''
+        new File(projectDir, "settings.gradle").text = SETTINGS
+        subprojects.each {name ->
+            def subprojectDir = new File(projectDir, name).tap { it.mkdir() }
+            new File(subprojectDir, "build.gradle").text = BUILD
+        }
 
         when:
         def runner = GradleRunner.create()
@@ -67,6 +76,49 @@ class ConfPluginFunctionalTest extends Specification {
 
         then:
         def json = new JsonSlurper().parseText(result.output.drop(result.output.indexOf('{\n')))
+        json.someOption == 'someValue'
+    }
+
+    def "settings settingsPlugin"() {
+        given:
+        def projectDir = new File("build/functionalTest")
+        projectDir.deleteDir()
+        projectDir.mkdirs()
+        def subprojects = ['sub1', 'sub2','sub3']
+        def configFile = new File(projectDir, "someConfig.conf") << "someOption=someValue"
+        String SETTINGS =  """
+            plugins {
+                id('net.gradleutil.gradle-conf')
+            }
+            include('sub1','sub2','sub2','sub3')
+        """.stripIndent()
+        String BUILD = """
+            confConfig.conf = file('../${configFile.name}')
+            generate{
+                bob {
+                    sourceConf = file('../${configFile.name}')
+                    schemaName = 'config'
+                    targetSchemaFile = file('config.schema')
+                }
+            }
+        """.stripIndent()
+        new File(projectDir, "settings.gradle").text = SETTINGS
+        new File(projectDir, "build.gradle").text = ''
+        subprojects.each {name ->
+            def subprojectDir = new File(projectDir, name).tap { it.mkdir() }
+            new File(subprojectDir, "build.gradle").text = BUILD
+        }
+
+        when:
+        def runner = GradleRunner.create()
+        runner.forwardOutput()
+        runner.withPluginClasspath()
+        runner.withArguments("generateConfigSchema", "generateModelBob","printConfig","-Si")
+        runner.withProjectDir(projectDir)
+        def result = runner.build()
+
+        then:
+        def json = new JsonSlurper().parseText(result.output.drop(result.output.lastIndexOf('{\n')))
         json.someOption == 'someValue'
     }
 
@@ -169,6 +221,60 @@ class ConfPluginFunctionalTest extends Specification {
             result.contains(it + 'GithubPackageRepo(name:defaultRepo, registryUrl:https://gradle.org, publish:true)')
             result.contains(it + 'GithubPackageRepo(name:defaultRepo, registryUrl:https://gradle.org, publish:true)')
             result.contains(it + 'GithubPackageRepo(name:anotherRepo, registryUrl:https://maven.pkg.github.com/bob/somerepo, publish:true)')
+        }
+    }
+
+    def "gitLabRepo should exist"() {
+        given:
+        def projectDir = new File("build/functionalTest")
+        projectDir.deleteDir()
+        projectDir.mkdirs()
+        def configFile = new File(projectDir, "config.conf") << '''
+        gitlab {
+          repository = "somerepo"
+          registry {
+            authToken = somepassword
+            url = "https://maven.pkg.github.com/"
+          }
+        }
+        '''.stripIndent()
+        new File(projectDir, "build.gradle") << ""
+        new File(projectDir, "settings.gradle") << """
+            plugins {
+                id('net.gradleutil.gradle-conf')
+            }
+            confConfig {
+                conf.set file('${configFile.name}')
+            }
+            gradle.settingsEvaluated{
+                gitLabPackagesRepo {
+                    defaultRepo {
+                        authToken = "weehoo"
+                        registryUrl = 'https://gradle.org'
+                    }
+                    anotherRepo {
+                    println config
+                        authToken = "weehoo"
+                        registryUrl = config.gitlab.registry.url
+                    }
+                }
+            }
+        """
+
+        when:
+        def runner = GradleRunner.create()
+        runner.forwardOutput()
+        runner.withPluginClasspath()
+        runner.withArguments("printConfig", "-Si")
+        runner.withProjectDir(projectDir)
+        def result = runner.build().output
+
+        then:
+        ['adding github packages repo ', 'adding publication for repo '].each {
+            result.contains(it + 'GitLapPackageRepo(name:anotherRepo, registryUrl:https://maven.pkg.github.com/bob/somerepo, publish:true)')
+            result.contains(it + 'GitLapPackageRepo(name:defaultRepo, registryUrl:https://gradle.org, publish:true)')
+            result.contains(it + 'GitLapPackageRepo(name:defaultRepo, registryUrl:https://gradle.org, publish:true)')
+            result.contains(it + 'GitLapPackageRepo(name:anotherRepo, registryUrl:https://maven.pkg.github.com/bob/somerepo, publish:true)')
         }
     }
 

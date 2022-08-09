@@ -2,8 +2,10 @@ package net.gradleutil.gen.settingsplugin
 
 import gg.jte.TemplateOutput
 import gg.jte.output.StringOutput
+import groovy.util.logging.Log
 import net.gradleutil.gen.Generator
 
+@Log(value = "logger")
 class GenPluginTemplate {
 
     File confFile

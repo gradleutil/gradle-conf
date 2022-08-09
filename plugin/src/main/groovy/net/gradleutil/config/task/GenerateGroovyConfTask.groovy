@@ -1,20 +1,17 @@
 package net.gradleutil.config.task
 
+import groovy.transform.CompileStatic
 import net.gradleutil.conf.json.schema.Schema
 import net.gradleutil.conf.json.schema.SchemaUtil
 import net.gradleutil.conf.transform.groovy.GroovyConfig
 import net.gradleutil.conf.transform.groovy.SchemaToGroovyClass
-import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.api.tasks.compile.GroovyCompile
-import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.options.Option
-import org.gradle.plugins.ide.idea.model.IdeaModel
 
 import javax.inject.Inject
 
@@ -49,7 +46,7 @@ class GenerateGroovyConfTask extends DefaultTask {
         packageName = project.objects.property(String).convention('config')
         rootClassName = project.objects.property(String).convention('Config')
         schemaName = project.objects.property(String)
-        dslFileName = project.objects.property(String).convention(project.provider{rootClassName.get() + '.groovy' })
+        dslFileName = project.objects.property(String).convention(project.provider { rootClassName.get() + '.groovy' })
         outputDirectory = project.objects.directoryProperty()
         description = "Generate DSL from JSON schema"
     }
@@ -67,7 +64,7 @@ class GenerateGroovyConfTask extends DefaultTask {
         def dslFile = project.file(dest.path + '/' + packageName.get().replace('.', '/') + '/' + dslFileName.get())
         logger.lifecycle("Generating groovy from file://${schemaFile.get()} to file://${dslFile}")
         dslFile.parentFile.mkdirs()
-        SchemaToGroovyClass.schemaToSimpleGroovyClass(schemaFile.getAsFile().get().text, packageName.get(),rootClassName.get(), dslFile)
+        SchemaToGroovyClass.schemaToSimpleGroovyClass(schemaFile.getAsFile().get().text, packageName.get(), rootClassName.get(), dslFile)
     }
 
 
