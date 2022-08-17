@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
     id "com.gradle.plugin-publish" version "0.12.0"
     id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'codenarc'
 }
 
 version = project.version != 'unspecified' ? project.version : file('VERSION').text.trim()
@@ -20,8 +21,14 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def confGenVer = '1.1.11'
+def confGenVer = '1.1.12'
 System.properties.setProperty('confGenVer',confGenVer)
+
+codenarc {
+    configFile = file("${rootProject.projectDir}/config/codenarc/rules.groovy")
+    reportFormat = 'html'
+    ignoreFailures = true
+}
 
 configurations {
     embedded
