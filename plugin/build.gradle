@@ -21,7 +21,7 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def confGenVer = '1.1.12'
+def confGenVer = '1.1.13'
 System.properties.setProperty('confGenVer',confGenVer)
 
 codenarc {
