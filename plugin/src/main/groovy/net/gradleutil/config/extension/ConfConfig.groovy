@@ -68,8 +68,8 @@ class ConfConfig {
         classLoader = objectFactory.class.classLoader
     }
 
-    ConfConfig load() {
-        if (config) {
+    ConfConfig load(Boolean reload = false) {
+        if (config && !reload) {
             return this
         }
         log.info("loading config: ${ conf.asFile.getOrNull() }")

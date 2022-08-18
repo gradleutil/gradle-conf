@@ -109,6 +109,12 @@ class ConfProjectPlugin implements Plugin<Project> {
             }
         })
 
+        project.gradle.projectsEvaluated {
+            if (confConfig.reloadAtConfiguration) {
+                confConfig.load(true)
+            }
+        }
+
         project.tasks.addRule("Pattern: printConfig<.name.space.path>") { String taskName ->
             if (taskName.startsWith("printConfig")) {
                  project.task(taskName) { Task t ->
