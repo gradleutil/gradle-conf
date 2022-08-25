@@ -92,9 +92,13 @@ class GitLabPackagesPlugin implements Plugin<ExtensionAware> {
                 void execute(MavenArtifactRepository repo) {
                     repo.url = gitLabPackageRepo.registryUrl ?: gitLabRegistryUrl.get()
                     repo.allowInsecureProtocol = true
+                    def token = gitLabPackageRepo.authToken ?: gitLabAuthToken.getOrElse('')
+                    if (!token) {
+                        log.warn "no authToken provided for ${repo.url}"
+                    }
                     repo.credentials(HttpHeaderCredentials) {
                         it.setName "PRIVATE-TOKEN"
-                        it.setValue gitLabAuthToken.getOrElse('')
+                        it.setValue token
                     }
                     repo.authentication {
                         it.register("header", HttpHeaderAuthentication)
