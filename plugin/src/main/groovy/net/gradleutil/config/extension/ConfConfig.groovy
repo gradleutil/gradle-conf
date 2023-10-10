@@ -7,6 +7,7 @@ import net.gradleutil.conf.config.Config
 import net.gradleutil.conf.config.ConfigFactory
 import net.gradleutil.conf.util.ConfUtil
 import net.gradleutil.conf.util.GenUtil
+import org.apache.tools.ant.taskdefs.Classloader
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
@@ -73,7 +74,7 @@ class ConfConfig {
             return this
         }
         log.info("loading config: ${ conf.asFile.getOrNull() }")
-        def loaderOptions = Loader.defaultOptions()
+        def loaderOptions = Loader.loaderOptions()
                 .useSystemProperties(useSystemProperties.get())
                 .useSystemEnvironment(useSystemEnvironment.get())
                 .baseName(baseName.get())
@@ -114,7 +115,11 @@ class ConfConfig {
     }
 
     def <T> T load(Class<T> clazz) {
-        return Loader.create(configObject, clazz, Loader.defaultOptions().allowUnresolved(true).silent(false))
+        return Loader.create(configObject, clazz, Loader.loaderOptions().classLoader(classLoader).allowUnresolved(true).silent(false))
+    }
+
+    def <T> T load(Class<T> clazz, ClassLoader cl){
+        return Loader.create(configObject, clazz, Loader.loaderOptions().classLoader(cl).allowUnresolved(true).silent(false))
     }
 
     static Config load(File config) {

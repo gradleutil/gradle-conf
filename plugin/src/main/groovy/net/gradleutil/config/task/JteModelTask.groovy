@@ -1,7 +1,7 @@
 package net.gradleutil.config.task
 
 import net.gradleutil.conf.transform.groovy.EPackageRenderer
-import net.gradleutil.conf.transform.groovy.SchemaToGroovyClass
+import net.gradleutil.conf.transform.Transformer
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileType
@@ -62,7 +62,7 @@ abstract class JteModelTask extends DefaultTask {
 
         def fullPackageName = "${packageName.get()}${packagePrefix ?: ''}.${name.toLowerCase()}"
 
-        def options = SchemaToGroovyClass.defaultOptions()
+        def options = SchemaToGroovyClass.de()
                 .jsonSchema(jsonSchema.text).packageName(fullPackageName)
                 .rootClassName(name).outputFile(modelSourceDir)
 

@@ -2,7 +2,7 @@ package net.gradleutil.config.extension
 
 
 import groovy.transform.CompileStatic
-import net.gradleutil.conf.transform.groovy.SchemaToGroovyClass
+import net.gradleutil.conf.transform.Transformer
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -73,7 +73,7 @@ class SettingsPlugin {
         def rootClassName = rootClassName.get()
         def srcDirectory = new File(outputDirectory, 'groovy')
         def dslFile = new File(srcDirectory, packagePath + '/' + rootClassName + 'DSL.groovy')
-        String confVersion = System.getProperty('confGenVer','1.1.15')
+        String confVersion = System.getProperty('confGenVer','1.2.0')
 
         String pluginId = "${packageName}.${rootClassName.toLowerCase()}"
         String implementationClass = "${packageName}.${rootClassName}Plugin"
@@ -93,10 +93,10 @@ class SettingsPlugin {
         genPluginTemplate.setOutputDirectory(outputDirectory)
         genPluginTemplate.write()
 
-        def options = SchemaToGroovyClass.defaultOptions().jsonSchema(schemaFile.text).packageName(packageName).rootClassName(rootClassName).outputFile(dslFile)
+        def options = Transformer.transformOptions().jsonSchema(schemaFile.text).packageName(packageName).rootClassName(rootClassName).outputFile(dslFile)
         options.classLoader(classLoader.get())
 
-        SchemaToGroovyClass.schemaToSimpleGroovyClass(options)
+        Transformer.transform(options)
 //        def result = GroovyConfig.toGroovyDsl(JsonConfig.getSchema(schemaFile.text, true), rootClassName, packageName+'.groovydsl')
 //        new File(srcDirectory, packagePath + '/' + 'groovydsl' + '/' + rootClassName + 'GroovyDSL.groovy').tap{it.parentFile.mkdirs()}.text = result
 

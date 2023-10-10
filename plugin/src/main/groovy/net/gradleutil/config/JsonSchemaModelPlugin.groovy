@@ -32,13 +32,16 @@ class JsonSchemaModelPlugin implements Plugin<Project> {
 
         configurationActionContainer.add {
             jsonSchemaModels.each { model ->
-                TaskProvider<JsonSchemaModelTask> provider = project.getTasks().register("jsonSchemaModel${model.name}", JsonSchemaModelTask.class, new Action<JsonSchemaModelTask>() {
+                TaskProvider<JsonSchemaModelTask> provider = project.getTasks().register("jsm.${model.name}", JsonSchemaModelTask.class, new Action<JsonSchemaModelTask>() {
                     void execute(JsonSchemaModelTask modelTask) {
                         modelTask.group = 'jsonSchemaModel'
                         modelTask.outputDir.set(model.outputDir ?: project.layout.buildDirectory.dir('jsm-content'))
                         modelTask.schemaDir.set(model.schemaDir)
                         modelTask.jteDir.set(model.jteDir)
                         modelTask.packageName.set(model.packageName ?: project.group.toString())
+                        modelTask.doFirst {
+                            modelTask.logger.lifecycle("from schema ${model.schemaDir} to file://${modelTask.outputDir.get()}")
+                        }
                     }
                 })
                 GeneratePlugin.addGenerationHooks(project,provider, model.outputDir)

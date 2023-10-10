@@ -4,7 +4,7 @@ import groovy.transform.CompileStatic
 import net.gradleutil.conf.json.schema.Schema
 import net.gradleutil.conf.json.schema.SchemaUtil
 import net.gradleutil.conf.transform.groovy.GroovyConfig
-import net.gradleutil.conf.transform.groovy.SchemaToGroovyClass
+import net.gradleutil.conf.transform.Transformer
 import net.gradleutil.config.extension.GenerateExtension
 import net.gradleutil.config.task.GenerateConfigSchema
 import net.gradleutil.config.task.GenerateGroovyConfTask
@@ -119,7 +119,7 @@ class GeneratePlugin implements Plugin<ExtensionAware> {
         def dslFile = new File(dest.path + '/' + genExt.packageName.replace('.', '/') + '/' + genExt.dslFileName)
         log.lifecycle("Generating DSL from file://${genExt.sourceSchemaFile} to file://${dslFile}")
         dslFile.parentFile.mkdirs()
-        SchemaToGroovyClass.schemaToSimpleGroovyClass(genExt.sourceSchemaFile.text, genExt.packageName, genExt.rootClassName, dslFile)
+        Transformer.transform(genExt.sourceSchemaFile.text, genExt.packageName, genExt.rootClassName, dslFile)
 //        def configuration = new ConfigEater(schema: schemaFile)
 //        dslFile.text = configuration.toGroovyDsl(packageName, schemaName)
     }

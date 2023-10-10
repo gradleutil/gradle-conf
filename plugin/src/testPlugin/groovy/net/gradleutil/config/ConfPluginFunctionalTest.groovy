@@ -41,7 +41,7 @@ class ConfPluginFunctionalTest extends Specification {
         projectDir.deleteDir()
         projectDir.mkdirs()
         def subprojects = ['sub1', 'sub2','sub3']
-        def configFile = new File(projectDir, "someConfig.conf") << "someOption=someValue"
+        def configFile = new File(projectDir, "someConfig.conf") << "fruits=[someValue]"
         new File(projectDir, "config.schema.json").text = new File('src/testPlugin/resources/json/veggies.schema.json').text
         String SETTINGS =  """
             plugins {
@@ -76,7 +76,7 @@ class ConfPluginFunctionalTest extends Specification {
 
         then:
         def json = new JsonSlurper().parseText(result.output.drop(result.output.indexOf('{\n')))
-        json.someOption == 'someValue'
+        json['fruits'] == ['someValue']
     }
 
     def "settings settingsPlugin"() {

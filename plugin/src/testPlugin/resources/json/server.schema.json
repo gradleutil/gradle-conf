@@ -1,0 +1,215 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/server",
+  "definitions": {
+    "jvm": {
+      "type": "object",
+      "title": "jvm",
+      "properties": {
+        "args": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "javaVersion": {"type": "string"},
+        "minHeapSize": {"type": "number"},
+        "heapSize": {"type": "number"},
+        "javaHome": {"type": "string"}
+      }
+    },
+    "app": {
+      "type": "object",
+      "title": "app",
+      "properties": {
+        "cfengine": {"type": "string"},
+        "webXMLOverride": {"type": "string"},
+        "webXML": {"type": "string"},
+        "serverHomeDirectory": {"type": "string"},
+        "serverConfigDir": {"type": "string"},
+        "webXMLOverrideForce": {"type": "boolean"},
+        "libDirs": {"type": "string"},
+        "webConfigDir": {"type": "string"},
+        "logDir": {"type": "string"},
+        "restMappings": {"type": "string"},
+        "WARPath": {"type": "string"},
+        "sessionCookieSecure": {"type": "boolean"},
+        "sessionCookieHTTPOnly": {"type": "boolean"}
+      }
+    },
+    "server": {
+      "type": "object",
+      "title": "server",
+      "properties": {
+        "trayicon": {"type": "string"},
+        "jvm": {"$ref": "#/definitions/jvm"},
+        "app": {"$ref": "#/definitions/app"},
+        "console": {"type": "boolean"},
+        "debug": {"type": "boolean"},
+        "profile": {"type": "string"},
+        "trayEnable": {"type": "boolean"},
+        "env": {"$ref": "#/definitions/env"},
+        "runwar": {"$ref": "#/definitions/runwar"},
+        "stopsocket": {"type": "number"},
+        "trace": {"type": "boolean"},
+        "dockEnable": {"type": "boolean"},
+        "startTimeout": {"type": "number"},
+        "web": {"$ref": "#/definitions/web"},
+        "name": {"type": "string"},
+        "trayOptions": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/trayOptions"}
+        },
+        "openBrowserURL": {"type": "string"},
+        "openBrowser": {"type": "boolean"}
+      }
+    },
+    "aliases": {
+      "type": "object",
+      "title": "aliases",
+      "properties": {
+        "/foo": {"type": "string"},
+        "/js": {"type": "string"}
+      }
+    },
+    "rewrites": {
+      "type": "object",
+      "title": "rewrites",
+      "properties": {
+        "statusPath": {"type": "string"},
+        "configReloadSeconds": {"type": "number"},
+        "enable": {"type": "boolean"},
+        "logEnable": {"type": "boolean"},
+        "config": {"type": "string"}
+      }
+    },
+    "basicAuth": {
+      "type": "object",
+      "title": "basicAuth",
+      "properties": {
+        "enable": {"type": "boolean"},
+        "users": {"$ref": "#/definitions/users"}
+      }
+    },
+    "AJP": {
+      "type": "object",
+      "title": "AJP",
+      "properties": {
+        "port": {"type": "number"},
+        "enable": {"type": "boolean"}
+      }
+    },
+    "HTTP": {
+      "type": "object",
+      "title": "HTTP",
+      "properties": {
+        "port": {"type": "number"},
+        "enable": {"type": "boolean"}
+      }
+    },
+    "env": {
+      "type": "object",
+      "title": "env",
+      "properties": {
+        "ANYTHING_HERE": {"type": "string"},
+        "THESE_ARE_ADDED": {"type": "string"}
+      }
+    },
+    "SSL": {
+      "type": "object",
+      "title": "SSL",
+      "properties": {
+        "keyPass": {"type": "string"},
+        "port": {"type": "number"},
+        "keyFile": {"type": "string"},
+        "enable": {"type": "boolean"},
+        "certFile": {"type": "string"}
+      }
+    },
+    "users": {
+      "type": "object",
+      "title": "users",
+      "properties": {
+        "userName2": {"type": "string"},
+        "userName1": {"type": "string"}
+      }
+    },
+    "runwar": {
+      "type": "object",
+      "title": "runwar",
+      "properties": {
+        "args": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "jarPath": {"type": "string"},
+        "UndertowOptions": {"$ref": "#/definitions/UndertowOptions"},
+        "XNIOOptions": {"$ref": "#/definitions/XNIOOptions"}
+      }
+    },
+    "web": {
+      "type": "object",
+      "title": "web",
+      "properties": {
+        "rulesFile": {"type": "string"},
+        "aliases": {"$ref": "#/definitions/aliases"},
+        "rewrites": {"$ref": "#/definitions/rewrites"},
+        "gzipEnable": {"type": "boolean"},
+        "blockSensitivePaths": {"type": "boolean"},
+        "basicAuth": {"$ref": "#/definitions/basicAuth"},
+        "AJP": {"$ref": "#/definitions/AJP"},
+        "blockFlashRemoting": {"type": "boolean"},
+        "HTTP": {"$ref": "#/definitions/HTTP"},
+        "rules": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "SSL": {"$ref": "#/definitions/SSL"},
+        "webroot": {"type": "string"},
+        "accessLogEnable": {"type": "boolean"},
+        "directoryBrowsing": {"type": "boolean"},
+        "rulesFileGlob": {"type": "string"},
+        "gzipPredicate": {"type": "string"},
+        "errorPages": {"$ref": "#/definitions/errorPages"},
+        "host": {"type": "string"},
+        "rulesFiles": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "maxRequests": {"type": "number"},
+        "welcomeFiles": {"type": "string"},
+        "blockCFAdmin": {"type": "boolean"}
+      }
+    },
+    "errorPages": {
+      "type": "object",
+      "title": "errorPages",
+      "properties": {
+        "default": {"type": "string"},
+        "500": {"type": "string"},
+        "404": {"type": "string"}
+      }
+    },
+    "trayOptions": {
+      "type": "object",
+      "title": "trayOptions",
+      "properties": {
+        "image": {"type": "string"},
+        "action": {"type": "string"},
+        "disabled": {"type": "boolean"},
+        "label": {"type": "string"},
+        "command": {"type": "string"},
+        "path": {"type": "string"},
+        "url": {"type": "string"}
+      }
+    },
+    "UndertowOptions": {
+      "type": "object",
+      "title": "UndertowOptions",
+      "properties": {"ALLOW_UNESCAPED_CHARACTERS_IN_URL": {"type": "boolean"}}
+    },
+    "XNIOOptions": {
+      "type": "object",
+      "title": "XNIOOptions",
+      "properties": {"WORKER_NAME": {"type": "string"}}
+    }
+  }
+}

@@ -1,6 +1,7 @@
 package net.gradleutil.config.task
 
-import net.gradleutil.conf.transform.groovy.SchemaToGroovyClass
+import net.gradleutil.conf.transform.TransformOptions
+import net.gradleutil.conf.transform.Transformer
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileType
@@ -18,6 +19,10 @@ abstract class JsonSchemaModelTask extends DefaultTask {
     @Optional
     @InputDirectory
     abstract DirectoryProperty getJteDir()
+
+    @Optional
+    @Input
+    abstract Property<String> getToType()
 
     @Input
     abstract Property<String> getPackageName()
@@ -44,19 +49,37 @@ abstract class JsonSchemaModelTask extends DefaultTask {
                     .replace(File.separator, '.').toLowerCase()
 
             def modelSourceDir = new File(getOutputDir().asFile.get(), packagePrefix.replace('.', File.separator) + File.separator + name.toLowerCase()).tap { mkdirs() }
-            def modelFile = new File(modelSourceDir, name + '.groovy')
-
             def fullPackageName = "${packageName.get()}${packagePrefix ?: ''}.${name.toLowerCase()}"
-
-            def options = SchemaToGroovyClass.defaultOptions()
-                    .jsonSchema(jsonSchema.text).packageName(fullPackageName)
-                    .rootClassName(name).outputFile(modelFile)
-
-            if (jteDir.isPresent()) {
-                options.jteDirectory(jteDir.get().asFile)
-            }
-
-            SchemaToGroovyClass.schemaToSimpleGroovyClass(options)
+            groovyModel(jsonSchema, modelSourceDir, fullPackageName)
         }
+    }
+
+    void groovyModel(File jsonSchema, File modelSourceDir, String fullPackageName) {
+        def options = Transformer.transformOptions()
+                .jsonSchema(jsonSchema.text).packageName(fullPackageName)
+                .toType(TransformOptions.Type.java)
+                .rootClassName(name).outputFile(modelSourceDir)
+
+        if(toType.isPresent()){
+            options.toType(TransformOptions.Type.valueOf(toType.get()))
+        }
+        if (jteDir.isPresent()) {
+            options.jteDirectory(jteDir.get().asFile)
+        }
+
+        Transformer.transform(options)
+    }
+
+    void javaModel(File jsonSchema, File modelSourceDir, String fullPackageName) {
+        def modelFile = new File(modelSourceDir, name + '.java')
+        def options = Transformer.transformOptions()
+                .jsonSchema(jsonSchema.text).packageName(fullPackageName)
+                .rootClassName(name).outputFile(modelFile)
+
+        if (jteDir.isPresent()) {
+            options.jteDirectory(jteDir.get().asFile)
+        }
+
+        Transformer.transform(options)
     }
 }

@@ -174,35 +174,85 @@ class ConfPluginDSLFunctionalTest extends Specification {
         new File(projectDir, 'build/mhf-content').exists()
     }
 
-    def "generate jsonSchema"() {
+    def "generate jsonSchema and load a record"() {
         given:
         def projectDir = new File("build/functionalTest")
         def jsonSchemaDir = new File(projectDir,'json')
         [projectDir, jsonSchemaDir].each { it.deleteDir(); it.mkdirs() }
-        new File(jsonSchemaDir, "veggies.schema.json").text = new File('src/testPlugin/resources/json/veggies.schema.json').text
+        ['src/test/resources/schema','src/test/java/runwar/internal'].each {
+            new File(projectDir, it).mkdirs(); println 'file:///' + projectDir + it }
+        new File(projectDir, "src/test/resources/schema/server.schema.json").text = new File('src/testPlugin/resources/json/server.schema.json').text
+        new File(projectDir, "src/test/resources/server.json").text = new File('src/testPlugin/resources/json/server.json').text
         new File(projectDir, "settings.gradle") << """
-            plugins {
-                id('net.gradleutil.gradle-conf')
-            }
         """.stripIndent()
         new File(projectDir, "build.gradle") << """
-            jsonSchemaModel {
-                "net.gradleutil.gradleconf" {
-                   schemaDir = file('json/')
+            plugins {
+                id('java')
+                id('net.gradleutil.gradle-conf')
+            }
+            repositories {
+                mavenLocal()
+                mavenCentral()
+                maven { url "https://jitpack.io" }
+            }
+            dependencies {
+                testImplementation 'net.gradleutil:conf-gen:1.2.0'
+            }
+            test {
+                useJUnitPlatform()
+                testLogging {
+                    events "passed", "skipped", "failed", "standardOut", "standardError"
+                    showStandardStreams = true
+                    exceptionFormat = 'full'
+                }
+            }
+            dependencies {
+                implementation 'org.codehaus.groovy:groovy:2.5.8'
+                testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+                testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+            }
+            jsonSchemaModel{
+                "runwar.internal"{
+                    schemaDir = file( 'src/test/resources/schema/' )
                 }
             }
         """.stripIndent()
-
+        new File(projectDir, "src/test/java/runwar/TestLoader.java") << """
+            package runwar;
+            import java.io.File;
+            import org.junit.jupiter.api.Test;
+            import static org.junit.jupiter.api.Assertions.assertNotNull;
+            import net.gradleutil.conf.Loader;
+            import runwar.internal.server.Server;
+            import net.gradleutil.conf.config.Config;
+            
+            class TestLoader {
+                @Test
+                public void testLoadServer() {
+                    try { 
+                        Config conf = Loader.load(new File("src/test/resources/server.json"), new File("src/test/resources/schema/server.schema.json"));
+                        Server serverOptions = Loader.create(conf, Server.class, Loader.loaderOptions().silent(false));
+                        assertNotNull(serverOptions);
+                        assertNotNull(serverOptions.debug);
+                    } catch (Exception e) {
+                        System.out.println("Exception: " + e);
+                    }
+                }
+            }
+    
+        """.stripIndent()
         when:
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
-        runner.withArguments("assemble", "-Si")
+        runner.withArguments("jsm.runwar.internal", "-Si")
         runner.withProjectDir(projectDir)
         def result = runner.build()
+        println result
 
         then:
         new File(projectDir, 'build/jsm-content').exists()
+        new File(projectDir, 'build/jsm-content/server/Server.java').exists()
     }
 
 

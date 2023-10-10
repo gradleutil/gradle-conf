@@ -8,8 +8,16 @@ import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencyResolutionListener
+import org.gradle.api.artifacts.ExternalDependency
+import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ResolvableDependencies
+import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.artifacts.ResolvedDependency
+import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
+import org.gradle.api.internal.artifacts.dependencies.DefaultSelfResolvingDependency
 import org.gradle.api.internal.file.copy.DefaultFileCopyDetails
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.BasePlugin
@@ -93,11 +101,11 @@ class ConfProjectPlugin implements Plugin<Project> {
 
         //confConfig.generateBean will use the generated plugin instead
         if (!confConfig.generateBean.get()) {
-/*
-            project.ext.config = project.providers.provider({
-                project.ext.configProperty.get()
-            })
-*/
+            /*
+                        project.ext.config = project.providers.provider({
+                            project.ext.configProperty.get()
+                        })
+            */
             //TODO: not dumb hack to resolve the properties during configure stage, versus the failed provider approach above
             project.extensions.add confConfig.projectExtensionName.get(), new ConfGetter(confConfig)
         }
@@ -122,7 +130,7 @@ class ConfProjectPlugin implements Plugin<Project> {
 
         project.tasks.addRule("Pattern: printConfig<.name.space.path>") { String taskName ->
             if (taskName.startsWith("printConfig")) {
-                 project.task(taskName) { Task t ->
+                project.task(taskName) { Task t ->
                     t.outputs.upToDateWhen { false }
                     t.doLast {
                         def namespace = taskName.replaceAll(/printConfig\.?/, '')
@@ -137,7 +145,7 @@ class ConfProjectPlugin implements Plugin<Project> {
 
     }
 
-    static void addMavenPublishInfo(Project project){
+    static void addMavenPublishInfo(Project project) {
         project.tasks.withType(AbstractPublishToMaven).tap {
             configureEach { AbstractPublishToMaven publishTask ->
                 publishTask.doLast {
@@ -162,14 +170,18 @@ class ConfProjectPlugin implements Plugin<Project> {
         }
     }
 
-    static String formatFileSize(String name, long length){
+    static String formatFileSize(String name, long length) {
         def formatStr = "%,10.2f"
         return "${String.format(formatStr, length / 1024 / 1024)} Mb " + name
     }
 
     static void addShadowJarInfo(Project project) {
+        if (project.extensions.extraProperties.has('addShadowJarInfo')) {
+            return
+        }
+        project.extensions.extraProperties['addShadowJarInfo'] = 'true'
         project.tasks.withType(Jar).configureEach { Jar jarTask ->
-            if(!jarTask.class.name.contains('shadow')){
+            if (!jarTask.class.name.contains('shadow')) {
                 return
             }
             Set<File> jars = []
@@ -179,19 +191,31 @@ class ConfProjectPlugin implements Plugin<Project> {
                 }
             }
             jarTask.doLast {
-                jars.sort { it.length() }.each { file ->
-                    jarTask.project.logger.lifecycle(formatFileSize(file.name, file.length()))
+                jars.sort { it.length() }.each {
+                    file ->
+                        jarTask.project.logger.lifecycle(formatFileSize(file.name, file.length())
+                                + getDependencyFromFile(jarTask.project, file))
                 }
                 def jarFile = jarTask.outputs.files.first() as File
-                jarTask.project.logger.lifecycle('Total: '+ formatFileSize(jarFile.name, jarFile.length()))
+                jarTask.project.logger.lifecycle('Total: ' + formatFileSize(jarFile.name, jarFile.length()))
             }
         }
     }
 
-    private void configureJavaPluginDefaults() {
-        JavaPluginConvention javaPluginConvention = project.getConvention().getPlugin(JavaPluginConvention.class);
-        SourceSet mainSourceSet = javaPluginConvention.getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-        mainSourceSet.compileClasspath
+    @CompileStatic
+    static String getDependencyFromFile(Project project, File file) {
+        String name = null
+        project.configurations.each { conf ->
+            if (!conf.canBeResolved || ['default','archives'].contains(conf.name) ) {
+                return
+            }
+            conf.resolvedConfiguration.resolvedArtifacts.each { ResolvedArtifact it ->
+                if (it.file.name == file.name) {
+                    name = it.id.getComponentIdentifier()
+                }
+            }
+        }
+        return " (${name})"
     }
 
 }

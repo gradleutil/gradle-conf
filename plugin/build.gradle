@@ -21,7 +21,7 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def confGenVer = '1.1.18'
+def confGenVer = '1.2.0'
 System.properties.setProperty('confGenVer',confGenVer)
 
 codenarc {
@@ -116,7 +116,9 @@ task testPlugin(type: Test, group: 'tests') {
     classpath = sourceSets.testPlugin.runtimeClasspath
     systemProperty 'confGenVer', confGenVer
     useJUnitPlatform()
+    classpath += configurations.runtimeClasspath
 }
+
 
 tasks.withType(Test) {
     // Show test results.

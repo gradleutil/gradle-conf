@@ -14,7 +14,7 @@ class ${gen.getRootClassName()}Plugin implements Plugin<Project> {
     void apply(Project project){
         log.info "applying project $project.name: ${gen.getPackageName()}.${gen.getRootClassName().toLowerCase()}"
         def confer = project.extensions.findByName('confConfig')
-        ${gen.getRootClassName()} con = confer.invokeMethod('load',  ${gen.getRootClassName()}) as ${gen.getRootClassName()}
+        ${gen.getRootClassName()} con = confer.invokeMethod('load',  [${gen.getRootClassName()}, ${gen.getRootClassName()}Plugin.class.classLoader]) as ${gen.getRootClassName()}
         project.extensions.add('config', con)
         log.info "finished applying project $project.name"
     }

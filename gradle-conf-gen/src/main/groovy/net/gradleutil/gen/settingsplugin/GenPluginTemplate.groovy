@@ -24,7 +24,7 @@ class GenPluginTemplate {
         def packageDirectory = new File(srcDirectory, packagePath)
         packageDirectory.mkdirs()
 
-        def opt = Generator.defaultOptions().classLoader(GenPluginTemplate.classLoader)
+        def opt = Generator.generatorOptions().classLoader(GenPluginTemplate.classLoader)
         def templateEngine = Generator.getTemplateEngine(opt)
 
         TemplateOutput buildGradle = new StringOutput()

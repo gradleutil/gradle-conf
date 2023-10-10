@@ -4,7 +4,7 @@ import groovy.transform.CompileStatic
 import net.gradleutil.conf.json.schema.Schema
 import net.gradleutil.conf.json.schema.SchemaUtil
 import net.gradleutil.conf.transform.groovy.GroovyConfig
-import net.gradleutil.conf.transform.groovy.SchemaToGroovyClass
+import net.gradleutil.conf.transform.Transformer
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
@@ -64,7 +64,7 @@ class GenerateGroovyConfTask extends DefaultTask {
         def dslFile = project.file(dest.path + '/' + packageName.get().replace('.', '/') + '/' + dslFileName.get())
         logger.lifecycle("Generating groovy from file://${schemaFile.get()} to file://${dslFile}")
         dslFile.parentFile.mkdirs()
-        SchemaToGroovyClass.schemaToSimpleGroovyClass(schemaFile.getAsFile().get().text, packageName.get(), rootClassName.get(), dslFile)
+        Transformer.transform(schemaFile.getAsFile().get().text, packageName.get(), rootClassName.get(), dslFile)
     }
 
 
