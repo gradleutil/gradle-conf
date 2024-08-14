@@ -8,28 +8,15 @@ import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.DependencyResolutionListener
-import org.gradle.api.artifacts.ExternalDependency
-import org.gradle.api.artifacts.ExternalModuleDependency
-import org.gradle.api.artifacts.ResolvableDependencies
 import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.api.artifacts.ResolvedDependency
-import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
-import org.gradle.api.internal.artifacts.dependencies.DefaultSelfResolvingDependency
 import org.gradle.api.internal.file.copy.DefaultFileCopyDetails
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.BasePlugin
-import org.gradle.api.plugins.JavaPluginConvention
-import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
-import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.configuration.project.ProjectConfigurationActionContainer
 
 import javax.inject.Inject
@@ -206,7 +193,7 @@ class ConfProjectPlugin implements Plugin<Project> {
     static String getDependencyFromFile(Project project, File file) {
         String name = null
         project.configurations.each { conf ->
-            if (!conf.canBeResolved || ['default','archives'].contains(conf.name) ) {
+            if (!conf.canBeResolved || ['default', 'archives'].contains(conf.name)) {
                 return
             }
             conf.resolvedConfiguration.resolvedArtifacts.each { ResolvedArtifact it ->

@@ -9,8 +9,15 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
+tasks.compileJava {
+    options.release.set(8)
+}
 
 jar {
     def jtedir = layout.buildDirectory.dir('jteFiles')
