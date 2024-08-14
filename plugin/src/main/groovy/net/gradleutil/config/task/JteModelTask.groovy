@@ -62,7 +62,7 @@ abstract class JteModelTask extends DefaultTask {
 
         def fullPackageName = "${packageName.get()}${packagePrefix ?: ''}.${name.toLowerCase()}"
 
-        def options = SchemaToGroovyClass.de()
+        def options = Transformer.transformOptions()
                 .jsonSchema(jsonSchema.text).packageName(fullPackageName)
                 .rootClassName(name).outputFile(modelSourceDir)
 

@@ -39,7 +39,7 @@ abstract class MhfModel extends DefaultTask {
             println "File change ${change.changeType}: ${change.normalizedPath}"
             def jsonSchema = GenUtil.configFileToReferenceSchemaJson(mhf.get().asFile, modelName.get())
             def modelFile = new File(getOutputDir().asFile.get(), modelName.get() + '.groovy')
-            Transformer.transform(jsonSchema, packageName.get(), modelName.get(), modelFile)
+            Transformer.transform(jsonSchema, packageName.get(), modelName.get(), "", modelFile)
         }
     }
 }

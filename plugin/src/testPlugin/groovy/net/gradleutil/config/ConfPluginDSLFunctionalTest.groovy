@@ -181,7 +181,7 @@ class ConfPluginDSLFunctionalTest extends Specification {
         [projectDir, jsonSchemaDir].each { it.deleteDir(); it.mkdirs() }
         ['src/test/resources/schema','src/test/java/runwar/internal'].each {
             new File(projectDir, it).mkdirs(); println 'file:///' + projectDir + it }
-        new File(projectDir, "src/test/resources/schema/server.schema.json").text = new File('src/testPlugin/resources/json/server.schema.json').text
+        new File(projectDir, "src/test/resources/schema/Server.schema.json").text = new File('src/testPlugin/resources/json/Server.schema.json').text
         new File(projectDir, "src/test/resources/server.json").text = new File('src/testPlugin/resources/json/server.json').text
         new File(projectDir, "settings.gradle") << """
         """.stripIndent()
@@ -213,6 +213,7 @@ class ConfPluginDSLFunctionalTest extends Specification {
             }
             jsonSchemaModel{
                 "runwar.internal"{
+                    convertToCamelCase = false
                     schemaDir = file( 'src/test/resources/schema/' )
                 }
             }
@@ -230,7 +231,7 @@ class ConfPluginDSLFunctionalTest extends Specification {
                 @Test
                 public void testLoadServer() {
                     try { 
-                        Config conf = Loader.load(new File("src/test/resources/server.json"), new File("src/test/resources/schema/server.schema.json"));
+                        Config conf = Loader.load(new File("src/test/resources/server.json"), new File("src/test/resources/schema/Server.schema.json"));
                         Server serverOptions = Loader.create(conf, Server.class, Loader.loaderOptions().silent(false));
                         assertNotNull(serverOptions);
                         assertNotNull(serverOptions.debug);

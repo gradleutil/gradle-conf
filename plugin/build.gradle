@@ -8,8 +8,6 @@ plugins {
 
 version = project.version != 'unspecified' ? project.version : file('VERSION').text.trim()
 group = 'net.gradleutil'
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 sourceSets {
     testPlugin {}
@@ -21,8 +19,19 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def confGenVer = '1.2.0'
+def confGenVer = '1.3.1'
 System.properties.setProperty('confGenVer',confGenVer)
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
+tasks.compileJava {
+    options.release.set(8)
+}
+
 
 codenarc {
     configFile = file("${rootProject.projectDir}/config/codenarc/rules.groovy")
@@ -37,15 +46,22 @@ configurations {
 dependencies {
     //    implementation project(path: ":gradle-conf-gen")
 
-    embedded("net.gradleutil:conf-gen:${confGenVer}") {
-        transitive = false
-    }
-    embedded("net.gradleutil:gradle-conf-gen:+") {
-        transitive = false
+    if(rootProject.name == "net.gradleutil") {
+        println "ALL PROJECTS"
+        rootProject.projects.each{ println it }
+        embedded project(":conf-gen")
+        embedded project(":gradle-conf:gradle-conf-gen")
+    } else {
+        embedded("net.gradleutil:conf-gen:${confGenVer}") {
+            transitive = false
+        }
+        embedded("net.gradleutil:gradle-conf-gen:+") {
+            transitive = false
+        }
     }
 
     //shadow gradleApi()
-    //shadow 'org.codehaus.groovy:groovy-all:3.0.10'
+    //shadow 'org.codehaus.groovy:groovy-all:3.0.21'
 
     testFixtures("net.gradleutil:conf-gen:${confGenVer}")
     testImplementation("net.gradleutil:conf-gen:${confGenVer}:test-fixtures")

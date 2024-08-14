@@ -1,7 +1,7 @@
 package net.gradleutil.config.task
 
+import com.networknt.schema.JsonSchema
 import groovy.transform.CompileStatic
-import net.gradleutil.conf.json.schema.Schema
 import net.gradleutil.conf.json.schema.SchemaUtil
 import net.gradleutil.conf.transform.groovy.GroovyConfig
 import net.gradleutil.conf.transform.Transformer
@@ -64,7 +64,7 @@ class GenerateGroovyConfTask extends DefaultTask {
         def dslFile = project.file(dest.path + '/' + packageName.get().replace('.', '/') + '/' + dslFileName.get())
         logger.lifecycle("Generating groovy from file://${schemaFile.get()} to file://${dslFile}")
         dslFile.parentFile.mkdirs()
-        Transformer.transform(schemaFile.getAsFile().get().text, packageName.get(), rootClassName.get(), dslFile)
+        Transformer.transform(schemaFile.getAsFile().get().text, packageName.get(), rootClassName.get(), schemaFile.get().asFile.parentFile.absolutePath,  dslFile)
     }
 
 
@@ -80,12 +80,12 @@ class GenerateGroovyConfTask extends DefaultTask {
     }
 
 
-    private Schema getJsonSchema(File file) {
+    private JsonSchema getJsonSchema(File file) {
         if (!file.exists()) {
             throw new IllegalArgumentException("Schema file ${file} does not exist")
         }
         try {
-            return SchemaUtil.getSchema(file.text)
+            return SchemaUtil.getSchema(file.text, file.parentFile.absolutePath)
         } catch (Exception e) {
             logger.error("Error loading schema: ${e.message}")
         }

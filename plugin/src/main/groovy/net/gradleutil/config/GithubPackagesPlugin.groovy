@@ -79,17 +79,21 @@ class GithubPackagesPlugin implements Plugin<ExtensionAware> {
             return
         }
         project.allprojects { Project p ->
-            if((p.plugins.findPlugin(ConfPlugin) as ConfPlugin)?.evaluatedProjects?.contains(p.name)){
-                return
-            }
-            p.apply plugin: 'maven-publish'
-            p.afterEvaluate {
-                getGithubPackageRepos().each {
-                    log.info "adding github packages repo ${it.toString()}"
+            try{
+                if((p.plugins.findPlugin(ConfPlugin) as ConfPlugin)?.evaluatedProjects?.contains(p.name)){
+                    return
                 }
-                applyBuildscript(p.buildscript)
-                applyRepositories(p.repositories)
-                applyPublishing(p.extensions.getByType(PublishingExtension), p)
+                p.apply plugin: 'maven-publish'
+                p.afterEvaluate {
+                    getGithubPackageRepos().each {
+                        log.info "adding github packages repo ${it.toString()}"
+                    }
+                    applyBuildscript(p.buildscript)
+                    applyRepositories(p.repositories)
+                    applyPublishing(p.extensions.getByType(PublishingExtension), p)
+                }
+            } catch (Exception e){
+                e.printStackTrace()
             }
         }
     }

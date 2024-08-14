@@ -38,6 +38,8 @@ class JsonSchemaModelPlugin implements Plugin<Project> {
                         modelTask.outputDir.set(model.outputDir ?: project.layout.buildDirectory.dir('jsm-content'))
                         modelTask.schemaDir.set(model.schemaDir)
                         modelTask.jteDir.set(model.jteDir)
+                        modelTask.toType.set(model.toType)
+                        modelTask.convertToCamelCase.set(model.convertToCamelCase)
                         modelTask.packageName.set(model.packageName ?: project.group.toString())
                         modelTask.doFirst {
                             modelTask.logger.lifecycle("from schema ${model.schemaDir} to file://${modelTask.outputDir.get()}")

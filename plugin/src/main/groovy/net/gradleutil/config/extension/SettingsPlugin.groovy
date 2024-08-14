@@ -93,7 +93,7 @@ class SettingsPlugin {
         genPluginTemplate.setOutputDirectory(outputDirectory)
         genPluginTemplate.write()
 
-        def options = Transformer.transformOptions().jsonSchema(schemaFile.text).packageName(packageName).rootClassName(rootClassName).outputFile(dslFile)
+        def options = Transformer.transformOptions().jsonSchema(schemaFile.text).packageName(packageName).rootClassName(rootClassName).outputFile(dslFile).basePath(schemaFile.parentFile.absolutePath)
         options.classLoader(classLoader.get())
 
         Transformer.transform(options)

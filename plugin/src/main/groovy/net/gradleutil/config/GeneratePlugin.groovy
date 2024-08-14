@@ -1,10 +1,10 @@
 package net.gradleutil.config
 
+import com.networknt.schema.JsonSchema
 import groovy.transform.CompileStatic
-import net.gradleutil.conf.json.schema.Schema
 import net.gradleutil.conf.json.schema.SchemaUtil
-import net.gradleutil.conf.transform.groovy.GroovyConfig
 import net.gradleutil.conf.transform.Transformer
+import net.gradleutil.conf.transform.groovy.GroovyConfig
 import net.gradleutil.config.extension.GenerateExtension
 import net.gradleutil.config.task.GenerateConfigSchema
 import net.gradleutil.config.task.GenerateGroovyConfTask
@@ -119,9 +119,9 @@ class GeneratePlugin implements Plugin<ExtensionAware> {
         def dslFile = new File(dest.path + '/' + genExt.packageName.replace('.', '/') + '/' + genExt.dslFileName)
         log.lifecycle("Generating DSL from file://${genExt.sourceSchemaFile} to file://${dslFile}")
         dslFile.parentFile.mkdirs()
-        Transformer.transform(genExt.sourceSchemaFile.text, genExt.packageName, genExt.rootClassName, dslFile)
-//        def configuration = new ConfigEater(schema: schemaFile)
-//        dslFile.text = configuration.toGroovyDsl(packageName, schemaName)
+        Transformer.transform(genExt.sourceSchemaFile.text, genExt.packageName, genExt.rootClassName, genExt.sourceSchemaFile.parentFile.absolutePath, dslFile)
+        //        def configuration = new ConfigEater(schema: schemaFile)
+        //        dslFile.text = configuration.toGroovyDsl(packageName, schemaName)
     }
 
 
@@ -131,12 +131,12 @@ class GeneratePlugin implements Plugin<ExtensionAware> {
     }
 
 
-    private static Schema getJsonSchema(File file) {
+    private static JsonSchema getJsonSchema(File file) {
         if (!file.exists()) {
             throw new IllegalArgumentException("Schema file ${file} does not exist")
         }
         try {
-            return SchemaUtil.getSchema(file.text)
+            return SchemaUtil.getSchema(file.text, file.parentFile.absolutePath)
         } catch (Exception e) {
             log.error("Error loading schema: ${e.message}")
         }
@@ -156,7 +156,7 @@ class GeneratePlugin implements Plugin<ExtensionAware> {
         }
     }
 
-    static addGenerationHooks(Project project, TaskProvider mhfModelTaskProvider, File outputDir){
+    static addGenerationHooks(Project project, TaskProvider mhfModelTaskProvider, File outputDir) {
         if (project.plugins.findPlugin(JavaBasePlugin)) {
             project.tasks.findByName('sourcesJar')?.dependsOn(mhfModelTaskProvider)
             project.tasks.getByName('compileJava').with {

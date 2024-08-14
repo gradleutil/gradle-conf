@@ -44,7 +44,7 @@ class ConfSettingsPlugin implements Plugin<Settings> {
             gradleExt.add('config', confConfig.config)
             settings.extensions.add('config', confConfig.config)
             if (confConfig.generateBean.get() && confConfig.schemaFile.isPresent()) {
-                println confConfig.schemaFile.asFile.get().absolutePath
+//                println confConfig.schemaFile.asFile.get().absolutePath
 //                    settings.buildCache.local= new DirectoryBuildCache().tap {directory = new File(settings.rootDir,'.gradle')}
                 settingsPlugin.outputDirectory.set(confConfig.outputDirectory)
                 settingsPlugin.schemaFile.set(confConfig.schemaFile)

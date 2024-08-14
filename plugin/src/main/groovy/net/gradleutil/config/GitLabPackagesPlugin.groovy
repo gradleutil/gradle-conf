@@ -29,6 +29,7 @@ class GitLabPackagesPlugin implements Plugin<ExtensionAware> {
 
     final ObjectFactory objectFactory
     final NamedDomainObjectContainer<GitLabPackageRepo> gitLabPackageRepos
+    Property<String> gitLabUserName
     Property<String> gitLabAuthToken
     Property<String> gitLabRepositoryName
     Property<String> gitLabRegistryUrl
@@ -43,6 +44,7 @@ class GitLabPackagesPlugin implements Plugin<ExtensionAware> {
         gitLabAuthToken = objects.property(String)
         gitLabRepositoryName = objects.property(String).convention(new File(System.properties.get('user.dir') as String).name)
         gitLabRegistryUrl = objects.property(String)
+        gitLabUserName = objects.property(String).convention("gitlab-ci-token")
         buildscriptDependencies = objects.listProperty(String).convention([])
         repositoryUrls = objects.listProperty(String).convention([])
     }
@@ -97,7 +99,7 @@ class GitLabPackagesPlugin implements Plugin<ExtensionAware> {
                         log.warn "no authToken provided for ${repo.url}"
                     }
                     repo.credentials(HttpHeaderCredentials) {
-                        it.setName "PRIVATE-TOKEN"
+                        it.setName gitLabUserName.get()
                         it.setValue token
                     }
                     repo.authentication {

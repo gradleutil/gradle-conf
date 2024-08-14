@@ -24,6 +24,10 @@ abstract class JsonSchemaModelTask extends DefaultTask {
     @Input
     abstract Property<String> getToType()
 
+    @Optional
+    @Input
+    abstract Property<Boolean> getConvertToCamelCase()
+
     @Input
     abstract Property<String> getPackageName()
 
@@ -50,18 +54,22 @@ abstract class JsonSchemaModelTask extends DefaultTask {
 
             def modelSourceDir = new File(getOutputDir().asFile.get(), packagePrefix.replace('.', File.separator) + File.separator + name.toLowerCase()).tap { mkdirs() }
             def fullPackageName = "${packageName.get()}${packagePrefix ?: ''}.${name.toLowerCase()}"
-            groovyModel(jsonSchema, modelSourceDir, fullPackageName)
+            transform(jsonSchema, modelSourceDir, fullPackageName)
         }
     }
 
-    void groovyModel(File jsonSchema, File modelSourceDir, String fullPackageName) {
+    void transform(File jsonSchema, File modelSourceDir, String fullPackageName) {
         def options = Transformer.transformOptions()
                 .jsonSchema(jsonSchema.text).packageName(fullPackageName)
                 .toType(TransformOptions.Type.java)
+                .basePath(jsonSchema.parentFile.absolutePath)
                 .rootClassName(name).outputFile(modelSourceDir)
 
         if(toType.isPresent()){
-            options.toType(TransformOptions.Type.valueOf(toType.get()))
+            options.toType(TransformOptions.Type.valueOf(TransformOptions.Type, toType.get()))
+        }
+        if(convertToCamelCase.isPresent()){
+            options.convertToCamelCase(convertToCamelCase.get())
         }
         if (jteDir.isPresent()) {
             options.jteDirectory(jteDir.get().asFile)
@@ -70,16 +78,4 @@ abstract class JsonSchemaModelTask extends DefaultTask {
         Transformer.transform(options)
     }
 
-    void javaModel(File jsonSchema, File modelSourceDir, String fullPackageName) {
-        def modelFile = new File(modelSourceDir, name + '.java')
-        def options = Transformer.transformOptions()
-                .jsonSchema(jsonSchema.text).packageName(fullPackageName)
-                .rootClassName(name).outputFile(modelFile)
-
-        if (jteDir.isPresent()) {
-            options.jteDirectory(jteDir.get().asFile)
-        }
-
-        Transformer.transform(options)
-    }
 }

@@ -7,8 +7,10 @@ class JteModel {
     File schemaDir
     String packageName
     String name
+    String toType
     File jteDir
     File outputDir
+    Boolean convertToCamelCase
 
     JteModel(String name){
         this.name = name
