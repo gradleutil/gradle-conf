@@ -31,7 +31,7 @@ jar {
 
 dependencies {
     implementation 'org.codehaus.groovy:groovy-all:' + config.versions.groovy
-    implementation 'net.gradleutil:conf-gen:1.2.0'
+    implementation 'net.gradleutil:conf-gen:1.3.1'
 }
 
 tasks.withType(Test).configureEach {

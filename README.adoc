@@ -12,23 +12,9 @@ Configure your builds with HOCON
 
 == Usage
 
-Add this to your `build.gradle`:
+Example settings usage `settings.gradle`:
 
 [source,groovy]
 ----
-buildscript {
-  repositories {
-    mavenCentral()
-    maven { url "https://plugins.gradle.org/m2/" }
-  }
-  dependencies {
-    classpath "gradleutil:gradle-conf:0.0.1"
-  }
-}
-
-apply plugin: 'gradleutil.conf'
-
-config {
-  conf = file('config.conf')
-}
+include::example/settings.gradle[tag=plugin]
 ----
